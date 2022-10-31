@@ -110,12 +110,12 @@ struct TimeForm: View {
 //                    Spacer()
 //                }
 //            }
-            button(decrement: 60, hapticStyle: .rigid)
+            button(decrement: 60, hapticStyle: .heavy)
             button(decrement: 15)
             Text("•")
                 .foregroundColor(Color(.quaternaryLabel))
             button(increment: 15)
-            button(increment: 60, hapticStyle: .rigid)
+            button(increment: 60, hapticStyle: .heavy)
             Spacer()
             if !time.isNowToTheMinute {
                 nowButton
