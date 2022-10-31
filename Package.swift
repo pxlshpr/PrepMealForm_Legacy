@@ -15,7 +15,7 @@ let package = Package(
             targets: ["PrepMealForm"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/pxlshpr/NamePicker", from: "0.0.18"),
+        .package(url: "https://github.com/pxlshpr/NamePicker", from: "0.0.19"),
         .package(url: "https://github.com/pxlshpr/SwiftHaptics", from: "0.1.3"),
         .package(url: "https://github.com/pxlshpr/SwiftSugar", from: "0.0.75"),
         .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.210"),
