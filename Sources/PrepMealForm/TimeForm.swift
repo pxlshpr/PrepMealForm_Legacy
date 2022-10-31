@@ -9,6 +9,7 @@ struct TimeForm: View {
 
     @StateObject var viewModel = ViewModel()
     
+    @State var initialTime: Date
     let name: String
     let date: Date
     @Binding var time: Date
@@ -18,6 +19,7 @@ struct TimeForm: View {
     init(name: String, time: Binding<Date>, date: Date) {
         self.date = date
         self.name = name
+        _initialTime = State(initialValue: time.wrappedValue)
         _time = time
         _pickerTime = State(initialValue: time.wrappedValue)
         
@@ -33,7 +35,7 @@ struct TimeForm: View {
         timeline
 //            .background(Color(.tertiarySystemGroupedBackground))
             .toolbar { bottomToolbarContent }
-//            .toolbar { navigationTrailingContent }
+            .toolbar { navigationTrailingContent }
             .toolbar { navigationLeadingContent }
 //            .navigationTitle("Time:")
 //            .toolbar { navigationTitleContent }
@@ -69,14 +71,22 @@ struct TimeForm: View {
     }
     
     //MARK: - UI Components
-//    var navigationTrailingContent: some ToolbarContent {
-//        ToolbarItemGroup(placement: .navigationBarTrailing) {
-//            if pagerController.currentDateIsToday {
-//                nowButton
-//            }
-//        }
-//    }
+    var navigationTrailingContent: some ToolbarContent {
+        ToolbarItemGroup(placement: .navigationBarTrailing) {
+            if !time.equalsIgnoringSeconds(initialTime) {
+                doneButton
+                    .transition(.scale)
+            }
+        }
+    }
     
+    var doneButton: some View {
+        Button {
+            dismiss()
+        } label: {
+            Image(systemName: "checkmark")
+        }
+    }
     var navigationTitleContent: some ToolbarContent {
         ToolbarItemGroup(placement: .principal) {
             datePicker
