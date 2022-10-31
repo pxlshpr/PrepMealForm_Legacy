@@ -1,0 +1,59 @@
+{
+  "pins" : [
+    {
+      "identity" : "activityindicatorview",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/exyte/ActivityIndicatorView",
+      "state" : {
+        "revision" : "0fb57e69b6130b4beb8ba49eaafe13563f2f6bd6",
+        "version" : "1.1.0"
+      }
+    },
+    {
+      "identity" : "namepicker",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/NamePicker",
+      "state" : {
+        "revision" : "232b96beb2a2321c566bbeea88dbc0a68a8ec74a",
+        "version" : "0.0.18"
+      }
+    },
+    {
+      "identity" : "swifthaptics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/SwiftHaptics",
+      "state" : {
+        "revision" : "c3069ce1390e5562b2d2c0e4ffed5a1b4e9aba54",
+        "version" : "0.1.3"
+      }
+    },
+    {
+      "identity" : "swiftsugar",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/SwiftSugar",
+      "state" : {
+        "revision" : "8f6e2615bee4969dd629c09cae9d900b52081b02",
+        "version" : "0.0.74"
+      }
+    },
+    {
+      "identity" : "swiftuisugar",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/SwiftUISugar",
+      "state" : {
+        "revision" : "e5d7c119378d25b85eb065e85839d9eb5b90e7f9",
+        "version" : "0.0.209"
+      }
+    },
+    {
+      "identity" : "timeline",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/Timeline",
+      "state" : {
+        "revision" : "5035d68cd74542572af670316690f378becd9bee",
+        "version" : "0.0.45"
+      }
+    }
+  ],
+  "version" : 2
+}
