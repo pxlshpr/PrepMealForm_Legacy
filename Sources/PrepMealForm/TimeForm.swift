@@ -73,18 +73,19 @@ struct TimeForm: View {
     //MARK: - UI Components
     var navigationTrailingContent: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarTrailing) {
-            if !time.equalsIgnoringSeconds(initialTime) {
-                doneButton
-                    .transition(.scale)
-            }
+            nowButton
         }
     }
     
+    @ViewBuilder
     var doneButton: some View {
-        Button {
-            dismiss()
-        } label: {
-            Image(systemName: "checkmark")
+        if !time.equalsIgnoringSeconds(initialTime) {
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "checkmark")
+            }
+            .transition(.scale)
         }
     }
     var navigationTitleContent: some ToolbarContent {
@@ -101,25 +102,6 @@ struct TimeForm: View {
 
     var bottomToolbarContent: some ToolbarContent {
         ToolbarItemGroup(placement: .bottomBar) {
-//            ZStack {
-//                HStack {
-//                    button(decrement: 60)
-//                    button(decrement: 15)
-//                    Spacer()
-//                }
-//                HStack {
-//                    Spacer()
-//                    button(increment: 15)
-//                    button(increment: 60)
-//                }
-//                HStack {
-//                    Spacer()
-//                    Button("Now") {
-//                        attemptToChangeTimeTo(Date())
-//                    }
-//                    Spacer()
-//                }
-//            }
             button(decrement: 60, hapticStyle: .heavy)
             button(decrement: 15)
             Text("•")
@@ -127,29 +109,19 @@ struct TimeForm: View {
             button(increment: 15)
             button(increment: 60, hapticStyle: .heavy)
             Spacer()
-            if !time.isNowToTheMinute {
-                nowButton
-            }
+            doneButton
         }
     }
     
+    @ViewBuilder
     var nowButton: some View {
-        Button("Now") {
-            Haptics.successFeedback()
-            attemptToChangeTimeTo(Date())
+        if !time.isNowToTheMinute {
+            Button("Now") {
+                Haptics.successFeedback()
+                attemptToChangeTimeTo(Date())
+            }
+            .transition(.scale)
         }
-//        Button {
-//            attemptToChangeTimeTo(Date())
-////            time = Date()
-////            viewModel.time = time
-//            Haptics.feedback(style: .soft)
-//        } label: {
-//            Text("Now")
-////            Image(systemName: "clock")
-////                .font(.title2)
-////                .padding(.horizontal, 7)
-//        }
-//        .buttonStyle(BorderlessButtonStyle())
     }
     
     func button(increment: Int? = nil, decrement: Int? = nil, hapticStyle: UIImpactFeedbackGenerator.FeedbackStyle = .soft) -> some View {
