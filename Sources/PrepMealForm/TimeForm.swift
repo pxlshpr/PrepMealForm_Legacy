@@ -66,9 +66,15 @@ struct TimeForm: View {
         Timeline(
             items: timelineItems,
             newItem: newMeal,
+            didTapOnNewItem: didTapOnNewItem,
             delegate: viewModel
         )
         .background(Color(.systemGroupedBackground))
+    }
+    
+    func didTapOnNewItem() {
+        Haptics.successFeedback()
+        dismiss()
     }
     
     //MARK: - UI Components
