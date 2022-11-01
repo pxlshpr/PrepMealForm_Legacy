@@ -125,7 +125,7 @@ public struct MealForm: View {
     }
     
     func tappedAdd() {
-        didSetValues(name, date)
+        didSetValues(name, time)
         Haptics.feedback(style: .soft)
         dismiss()
     }
