@@ -15,15 +15,18 @@ public struct MealForm: View {
     let presets: [String]
     
     let didSetValues: (String, Date) -> ()
+    let getTimelineItemsHandler: GetTimelineItemsHandler?
 
     public init(
         date: Date = Date(),
         name: String = "",
         recents: [String] = [],
         presets: [String] = [],
+        getTimelineItemsHandler: GetTimelineItemsHandler? = nil,
         didSetValues: @escaping (String, Date) -> ()
     ) {
         self.date = date
+        self.getTimelineItemsHandler = getTimelineItemsHandler
         self.recents = recents
         self.presets = presets
         self.didSetValues = didSetValues
@@ -97,7 +100,12 @@ public struct MealForm: View {
     }
     
     var timePicker: some View {
-        TimeForm(name: name, time: $time, date: date)
+        TimeForm(
+            name: name,
+            time: $time,
+            date: date,
+            getTimelineItemsHandler: getTimelineItemsHandler
+        )
     }
     
     var namePicker: some View {

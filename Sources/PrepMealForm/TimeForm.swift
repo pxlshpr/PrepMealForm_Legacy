@@ -3,6 +3,8 @@ import SwiftHaptics
 import Timeline
 import SwiftSugar
 
+public typealias GetTimelineItemsHandler = ((Date) async throws -> [TimelineItem])
+
 struct TimeForm: View {
     
     @Environment(\.dismiss) var dismiss
@@ -15,10 +17,14 @@ struct TimeForm: View {
     @Binding var time: Date
     @State var pickerTime: Date
     @StateObject var newMeal: TimelineItem
-
-    init(name: String, time: Binding<Date>, date: Date) {
+    
+    let getTimelineItemsHandler: GetTimelineItemsHandler?
+    @State var timelineItems: [TimelineItem] = []
+    
+    init(name: String, time: Binding<Date>, date: Date, getTimelineItemsHandler: GetTimelineItemsHandler? = nil) {
         self.date = date
         self.name = name
+        self.getTimelineItemsHandler = getTimelineItemsHandler
         _initialTime = State(initialValue: time.wrappedValue)
         _time = time
         _pickerTime = State(initialValue: time.wrappedValue)
@@ -53,12 +59,7 @@ struct TimeForm: View {
                 Haptics.feedback(style: .soft)
 //                time = newValue
             }
-    }
-    
-    var timelineItems: [TimelineItem] {
-        //TODO: CoreData
-        []
-//        Store.timelineItems(for: pagerController.currentDate)
+            .onAppear(perform: appeared)
     }
     
     var timeline: some View {
@@ -180,37 +181,23 @@ struct TimeForm: View {
             .datePickerStyle(.compact)
             .labelsHidden()
     }
+    
+    //MARK: - Actions
+    
+    func appeared() {
+        getTimelineItems()
+    }
+    
+    func getTimelineItems() {
+        guard let getTimelineItemsHandler else {
+            timelineItems = []
+            return
+        }
+        Task {
+            let timelineItems = try await getTimelineItemsHandler(date)
+            await MainActor.run {
+                self.timelineItems = timelineItems
+            }
+        }
+    }
 }
-
-//MARK: - ViewModel
-
-//MARK: - Extensions
-
-//TODO: CoreData
-//extension Store {
-//    static func timelineItems(for date: Date) -> [TimelineItem] {
-//        /// get meals
-//        let meals = Self.shared.meals(on: date)
-//        var timelineItems = meals.map { meal in
-//            TimelineItem(id: (meal.id ?? UUID()).uuidString,
-//                         name: meal.nameString,
-//                         date: meal.timeDate,
-//                         emojis: meal.timelineEmojis,
-//                         type: .meal)
-//        }
-//
-//        /// Get and create TimelineItems from workouts
-//        let workouts = Self.workouts(onDate: date)
-//        timelineItems.append(contentsOf: workouts.map({ workout in
-//            TimelineItem(id: (workout.id ?? UUID()).uuidString,
-//                         name: workout.name ?? "Workout",
-//                         date: workout.startDate,
-//                         duration: TimeInterval(workout.duration),
-//                         emojiStrings: [workout.emoji],
-//                         type: .workout)
-//        }))
-//
-//        return timelineItems
-//    }
-//}
-
