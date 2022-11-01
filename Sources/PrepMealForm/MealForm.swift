@@ -13,16 +13,20 @@ public struct MealForm: View {
     let date: Date
     let recents: [String]
     let presets: [String]
+    
+    let didSetValues: (String, Date) -> ()
 
     public init(
         date: Date = Date(),
         name: String = "",
         recents: [String] = [],
-        presets: [String] = []
+        presets: [String] = [],
+        didSetValues: @escaping (String, Date) -> ()
     ) {
         self.date = date
         self.recents = recents
         self.presets = presets
+        self.didSetValues = didSetValues
 
         //TODO: We need to assign time here based on the date provided
         _time = State(initialValue: date)
@@ -45,7 +49,6 @@ public struct MealForm: View {
             Spacer()
             if !name.isEmpty {
                 addButton
-                addTemplateButton
             }
         }
     }
@@ -65,53 +68,8 @@ public struct MealForm: View {
         FormPrimaryButton(title: "Add") {
             tappedAdd()
         }
-//        Button {
-//        } label: {
-//            Text("Add")
-//                .bold()
-//                .foregroundColor(.white)
-//                .padding(.vertical)
-//                .frame(maxWidth: .infinity)
-//                .background(
-//                    RoundedRectangle(cornerRadius: 10)
-//                        .foregroundColor(.accentColor)
-//                )
-//                .padding(.horizontal)
-//                .padding(.horizontal)
-//        }
     }
-    
-    var addTemplateButton: some View {
-        FormSecondaryButton(title: "Add Preset Meal") {
-        }
-//        Button {
-//
-//        } label: {
-//            Text("Add Preset Meal")
-//                .bold()
-//                .foregroundColor(.accentColor)
-//                .padding(.vertical)
-//                .frame(maxWidth: .infinity)
-//                .background(
-//                    RoundedRectangle(cornerRadius: 10)
-//                        .foregroundColor(.clear)
-//                )
-//                .padding(.horizontal)
-//                .padding(.horizontal)
-//                .contentShape(Rectangle())
-//        }
-    }
-    
-    var bottomToolbarContent: some ToolbarContent {
-        ToolbarItemGroup(placement: .bottomBar) {
-            Button {
-                tappedAdd()
-            } label: {
-                Text("Add")
-            }
-        }
-    }
-    
+
     var form: some View {
         Form {
             Section("Name") {
@@ -167,8 +125,7 @@ public struct MealForm: View {
     }
     
     func tappedAdd() {
-        //TODO: CoreData
-//        Store.createMeal(at: time, named: name)
+        didSetValues(name, date)
         Haptics.feedback(style: .soft)
         dismiss()
     }
