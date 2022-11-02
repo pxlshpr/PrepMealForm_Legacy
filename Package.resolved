@@ -19,6 +19,15 @@
       }
     },
     {
+      "identity" : "prepdatatypes",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/PrepDataTypes",
+      "state" : {
+        "revision" : "8668e2c0c9945b3c97b31f0500c004a01c4e3057",
+        "version" : "0.0.79"
+      }
+    },
+    {
       "identity" : "swifthaptics",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/SwiftHaptics",
@@ -50,8 +59,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/Timeline",
       "state" : {
-        "revision" : "ff5ec6f26b5e8fa4798b57ea783f965637eed61b",
-        "version" : "0.0.52"
+        "revision" : "291b1bdac25531e61266f14fc93d964900f99238",
+        "version" : "0.0.56"
       }
     }
   ],
