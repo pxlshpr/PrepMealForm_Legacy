@@ -15,12 +15,12 @@ let package = Package(
             targets: ["PrepMealForm"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.79"),
-        .package(url: "https://github.com/pxlshpr/NamePicker", from: "0.0.19"),
+        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.85"),
+        .package(url: "https://github.com/pxlshpr/NamePicker", from: "0.0.20"),
         .package(url: "https://github.com/pxlshpr/SwiftHaptics", from: "0.1.3"),
-        .package(url: "https://github.com/pxlshpr/SwiftSugar", from: "0.0.76"),
+        .package(url: "https://github.com/pxlshpr/SwiftSugar", from: "0.0.83"),
         .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.210"),
-        .package(url: "https://github.com/pxlshpr/Timeline", from: "0.0.56"),
+        .package(url: "https://github.com/pxlshpr/Timeline", from: "0.0.63"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.

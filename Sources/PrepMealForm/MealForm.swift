@@ -3,12 +3,16 @@ import SwiftHaptics
 import NamePicker
 import SwiftUISugar
 
+let Presets = ["Breakfast", "Lunch", "Dinner", "Pre-workout Meal", "Post-workout Meal", "Intra-workout Snack", "Snack", "Dinner Out", "Supper", "Midnight Snack"]
+
 public struct MealForm: View {
 
     @Environment(\.dismiss) var dismiss
     @State var name = ""
     @State var time: Date
     @State var path: [Route] = []
+
+    @State var pickerTime: Date
 
     let date: Date
     let recents: [String]
@@ -17,18 +21,20 @@ public struct MealForm: View {
     let didSetValues: (String, Date) -> ()
     let getTimelineItemsHandler: GetTimelineItemsHandler?
 
+    @FocusState var isFocused: Bool
     public init(
         date: Date = Date(),
         name: String = "",
         recents: [String] = [],
-        presets: [String] = [],
+        presets: [String]? = nil,
         getTimelineItemsHandler: GetTimelineItemsHandler? = nil,
         didSetValues: @escaping (String, Date) -> ()
     ) {
         self.date = date
+        _pickerTime = State(initialValue: date)
         self.getTimelineItemsHandler = getTimelineItemsHandler
         self.recents = recents
-        self.presets = presets
+        self.presets = presets ?? Presets
         self.didSetValues = didSetValues
 
         //TODO: We need to assign time here based on the date provided
@@ -41,19 +47,188 @@ public struct MealForm: View {
             contents
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Add Meal")
+            .toolbar { navigationTrailingButton }
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: Route.self, destination: navigationDestination)
+            .onChange(of: time, perform: onChangeOfTime)
         }
     }
     
-    var contents: some View {
-        VStack {
-            form
-            Spacer()
-            if !name.isEmpty {
-                addButton
+    func onChangeOfTime(_ time: Date) {
+        self.pickerTime = time
+    }
+    
+    var navigationTrailingButton: some ToolbarContent {
+        ToolbarItemGroup(placement: .navigationBarTrailing) {
+            Button("Add") {
+                
             }
         }
+    }
+    var contents: some View {
+        form
+    }
+
+    var form: some View {
+        FormStyledScrollView {
+            nameSection
+            timeSection
+        }
+    }
+    
+    var nameSection: some View {
+        FormStyledSection(
+            header: Text("Name"),
+            horizontalPadding: 0,
+            verticalPadding: 0
+        ) {
+            VStack {
+                HStack {
+                    TextField("Name", text: $name)
+                        .focused($isFocused)
+                    Spacer()
+                    Button {
+                        path.append(.name)
+                    } label: {
+                        Image(systemName: "square.grid.3x2")
+                    }
+                }
+                .padding(.top, 15)
+                .padding(.bottom, 5)
+                .padding(.horizontal, 17)
+                Divider()
+                    .padding(.leading, 17)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack {
+                        ForEach(Presets.indices, id: \.self) { index in
+                            buttonLabel(Presets[index])
+                                .padding(.leading, index == 0 ? 17 : 0)
+                                .padding(.trailing, index ==  Presets.count - 1 ? 17 : 0)
+                        }
+                    }
+                }
+                .listRowInsets(.init(top: 2, leading: 0, bottom: 2, trailing: 0))
+                .padding(.top, 5)
+                .padding(.bottom, 15)
+            }
+//            Button {
+//                path.append(.name)
+//            } label: {
+//                if name.isEmpty {
+//                    Text("Required")
+//                        .foregroundColor(.secondary)
+//                } else {
+//                    Text(name)
+//                        .foregroundColor(.primary)
+//                }
+//            }
+        }
+    }
+    
+    func buttonLabel(_ string: String) -> some View {
+        Text(string)
+          .foregroundColor(Color(.secondaryLabel))
+          .padding(.vertical, 6)
+          .padding(.horizontal, 8)
+          .background(
+//            Capsule(style: .continuous)
+            RoundedRectangle(cornerRadius: 5.0, style: .continuous)
+                  .fill(Color(.secondarySystemFill))
+          )
+    }
+    
+    @ViewBuilder
+    var timeSectionFooter: some View {
+        if date.isToday {
+            Text(pickerTime.isToday ? "Today" : "Tomorrow")
+        }
+    }
+    
+    var timeSection: some View {
+        FormStyledSection(header: Text("Time"), footer: timeSectionFooter) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    ZStack {
+                        datePickerTime
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        HStack {
+                            Spacer()
+                            Button {
+                                path.append(.time)
+                            } label: {
+                                Image(systemName: "calendar.day.timeline.left")
+                            }
+                        }
+                    }
+                }
+                HStack(spacing: 0) {
+                    button(decrement: 60, hapticStyle: .heavy)
+                    button(decrement: 15)
+                    Text("•")
+                        .foregroundColor(Color(.quaternaryLabel))
+                    button(increment: 15)
+                    button(increment: 60, hapticStyle: .heavy)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+            }
+        }
+    }
+    
+    func button(increment: Int? = nil, decrement: Int? = nil, hapticStyle: UIImpactFeedbackGenerator.FeedbackStyle = .soft) -> some View
+    {
+        Button {
+            let interval: TimeInterval
+            if let increment = increment {
+                interval = TimeInterval(increment)
+            } else if let decrement = decrement {
+                interval = TimeInterval(-decrement)
+            } else {
+                interval = 0
+            }
+            let newTime = time.addingTimeInterval(interval * 60)
+            self.time = newTime
+            self.pickerTime = newTime
+            Haptics.feedback(style: hapticStyle)
+        } label: {
+            let systemName: String
+            if let increment = increment {
+                systemName = "goforward.\(increment)"
+            } else if let decrement = decrement {
+                systemName = "gobackward.\(decrement)"
+            } else {
+                systemName = "questionmark.circle"
+            }
+            return Image(systemName: systemName)
+                .font(.title2)
+                .padding(.horizontal, 7)
+//                .padding(3)
+        }
+        .buttonStyle(BorderlessButtonStyle())
+    }
+    
+    var datePicker: some View {
+        let start = date.startOfDay
+        let end = date.moveDayBy(1).atEndOfWeeHours
+        let range = start...end
+        return DatePicker(
+            "",
+            selection: $pickerTime,
+            in: range,
+            displayedComponents: [.date]
+        )
+        .datePickerStyle(.compact)
+        .labelsHidden()
+    }
+    var datePickerTime: some View {
+        let start = date.startOfDay
+        let end = date.moveDayBy(1).atEndOfWeeHours
+        let range = start...end
+        return DatePicker("",
+                   selection: $pickerTime,
+                   in: range,
+                   displayedComponents: [.date, .hourAndMinute])
+            .datePickerStyle(.compact)
+            .labelsHidden()
     }
 
     @ViewBuilder
@@ -71,32 +246,7 @@ public struct MealForm: View {
         FormPrimaryButton(title: "Add") {
             tappedAdd()
         }
-    }
-
-    var form: some View {
-        Form {
-            Section("Name") {
-                Button {
-                    path.append(.name)
-                } label: {
-                    if name.isEmpty {
-                        Text("Required")
-                            .foregroundColor(.secondary)
-                    } else {
-                        Text(name)
-                            .foregroundColor(.primary)
-                    }
-                }
-            }
-            Section("Time") {
-                Button {
-                    path.append(.time)
-                } label: {
-                    Text(timeString)
-                        .foregroundColor(.primary)
-                }
-            }
-        }
+        .animation(.none, value: isFocused)
     }
     
     var timePicker: some View {
@@ -111,7 +261,9 @@ public struct MealForm: View {
     var namePicker: some View {
         NamePicker(
             name: $name,
+            showTextField: false,
             showClearButton: true,
+//            focusOnAppear: true,
             recentStrings: recents,
             presetStrings: presets
         )
@@ -144,18 +296,48 @@ public struct MealForm: View {
     }
 }
 
-//extension Store {
-//    static func createMeal(at date: Date, named name: String) {
-//        let day = Store.shared.dayCreatingIfNeeded(forDate: date)
-//        let meal = Meal(context: mainContext)
-//        meal.id = UUID()
-//        meal.user = Store.user
-//        meal.name = name
-//        meal.time = Int64(date.timeIntervalSince1970)
-//        meal.day = day
-//        meal.createdAt = Int64(Date().timeIntervalSince1970)
-//        meal.updatedAt = Int64(Date().timeIntervalSince1970)
-//
-//        saveMainContext()
-//    }
-//}
+import PrepDataTypes
+
+struct ContentView: View {
+    
+    @State var showingMealForm = true
+    
+    var body: some View {
+        NavigationView {
+            Color.clear
+                .navigationTitle("Meal Form")
+                .sheet(isPresented: $showingMealForm) { mealForm }
+        }
+    }
+    
+    var mealForm: some View {
+        MealForm(
+            date: Date(),
+            name: "Meal 1",
+            recents: ["Recents", "go here"],
+            presets: Presets,
+            getTimelineItemsHandler: getTimelineItems
+        ) { name, date in
+            
+        }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.hidden)
+    }
+    
+    func getTimelineItems(_ date: Date) -> [TimelineItem] {
+        var items: [TimelineItem] = []
+        for i in 0...10 {
+            items.append(TimelineItem(
+                name: "Meal \(i)",
+                date: Date().startOfDay.addingTimeInterval(Double(i*3600))
+            ))
+        }
+        return items
+    }
+}
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
+}
