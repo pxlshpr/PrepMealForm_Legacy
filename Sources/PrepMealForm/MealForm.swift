@@ -152,6 +152,10 @@ public struct MealForm: View {
                         datePickerTime
                             .frame(maxWidth: .infinity, alignment: .center)
                         HStack {
+                            Button("Now") {
+                                self.time = Date()
+                                self.pickerTime = Date()
+                            }
                             Spacer()
                             Button {
                                 path.append(.time)
