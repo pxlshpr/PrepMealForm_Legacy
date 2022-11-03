@@ -151,29 +151,31 @@ public struct MealForm: View {
                     ZStack {
                         datePickerTime
                             .frame(maxWidth: .infinity, alignment: .center)
-                        HStack {
-                            Button("Now") {
-                                self.time = Date()
-                                self.pickerTime = Date()
-                            }
-                            Spacer()
-                            Button {
-                                path.append(.time)
-                            } label: {
-                                Image(systemName: "calendar.day.timeline.left")
-                            }
-                        }
                     }
                 }
-                HStack(spacing: 0) {
-                    button(decrement: 60, hapticStyle: .heavy)
-                    button(decrement: 15)
-                    Text("•")
-                        .foregroundColor(Color(.quaternaryLabel))
-                    button(increment: 15)
-                    button(increment: 60, hapticStyle: .heavy)
+                ZStack {
+                    HStack {
+                        Button("Now") {
+                            self.time = Date()
+                            self.pickerTime = Date()
+                        }
+                        Spacer()
+                        Button {
+                            path.append(.time)
+                        } label: {
+                            Image(systemName: "calendar.day.timeline.left")
+                        }
+                    }
+                    HStack(spacing: 0) {
+                        button(decrement: 60, hapticStyle: .heavy)
+                        button(decrement: 15)
+                        Text("•")
+                            .foregroundColor(Color(.quaternaryLabel))
+                        button(increment: 15)
+                        button(increment: 60, hapticStyle: .heavy)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
                 }
-                .frame(maxWidth: .infinity, alignment: .center)
             }
         }
     }
