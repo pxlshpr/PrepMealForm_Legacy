@@ -48,6 +48,7 @@ public struct MealForm: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Add Meal")
             .toolbar { navigationTrailingButton }
+            .toolbar { navigationLeadingButton }
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: Route.self, destination: navigationDestination)
             .onChange(of: time, perform: onChangeOfTime)
@@ -58,10 +59,31 @@ public struct MealForm: View {
         self.pickerTime = time
     }
     
+    var navigationLeadingButton: some ToolbarContent {
+        ToolbarItemGroup(placement: .navigationBarLeading) {
+            Button {
+                Haptics.feedback(style: .soft)
+                dismiss()
+            } label: {
+                Image(systemName: "multiply.circle.fill")
+                    .font(.system(size: 20))
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(
+                        Color(.tertiaryLabel),
+                        Color(.quaternaryLabel)
+                            .opacity(0.5)
+                    )
+            }
+        }
+    }
+    
     var navigationTrailingButton: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarTrailing) {
-            Button("Add") {
-                
+            Button {
+                tappedAdd()
+            } label: {
+                Text("Add")
+                    .bold()
             }
         }
     }
