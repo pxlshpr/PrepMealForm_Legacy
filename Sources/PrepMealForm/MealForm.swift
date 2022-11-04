@@ -138,7 +138,7 @@ public struct MealForm: View {
     }
     
     @ViewBuilder
-    var timeSectionFooter: some View {
+    var timeSectionHeader: some View {
         if date.isToday {
             Text("Time, " + (pickerTime.isToday ? "Today" : "Tomorrow"))
         } else {
@@ -147,7 +147,7 @@ public struct MealForm: View {
     }
     
     var timeSection: some View {
-        FormStyledSection(header: Text("Time")) {
+        FormStyledSection(header: timeSectionHeader) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     ZStack {
