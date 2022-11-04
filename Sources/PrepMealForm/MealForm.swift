@@ -9,10 +9,10 @@ public struct MealForm: View {
 
     @Environment(\.dismiss) var dismiss
     @State var name = ""
-    @State var time: Date
     @State var path: [Route] = []
 
-    @State var pickerTime: Date
+    @State var time: Date
+//    @State var pickerTime: Date
 
     let date: Date
     let recents: [String]
@@ -31,7 +31,7 @@ public struct MealForm: View {
         didSetValues: @escaping (String, Date) -> ()
     ) {
         self.date = date
-        _pickerTime = State(initialValue: date)
+//        _pickerTime = State(initialValue: date)
         self.getTimelineItemsHandler = getTimelineItemsHandler
         self.recents = recents
         self.presets = presets ?? Presets
@@ -51,13 +51,13 @@ public struct MealForm: View {
             .toolbar { navigationLeadingButton }
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: Route.self, destination: navigationDestination)
-            .onChange(of: time, perform: onChangeOfTime)
+//            .onChange(of: time, perform: onChangeOfTime)
         }
     }
     
-    func onChangeOfTime(_ time: Date) {
-        self.pickerTime = time
-    }
+//    func onChangeOfTime(_ time: Date) {
+//        self.pickerTime = time
+//    }
     
     var navigationLeadingButton: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarLeading) {
@@ -162,7 +162,7 @@ public struct MealForm: View {
     @ViewBuilder
     var timeSectionHeader: some View {
         if date.isToday {
-            Text("Time, " + (pickerTime.isToday ? "Today" : "Tomorrow"))
+            Text("Time, " + (time.isToday ? "Today" : "Tomorrow"))
         } else {
             Text("Time")
         }
@@ -181,7 +181,7 @@ public struct MealForm: View {
                     HStack {
                         Button("Now") {
                             self.time = Date()
-                            self.pickerTime = Date()
+//                            self.pickerTime = Date()
                         }
                         Spacer()
                         Button {
@@ -217,7 +217,7 @@ public struct MealForm: View {
             }
             let newTime = time.addingTimeInterval(interval * 60)
             self.time = newTime
-            self.pickerTime = newTime
+//            self.pickerTime = newTime
             Haptics.feedback(style: hapticStyle)
         } label: {
             let systemName: String
@@ -242,7 +242,7 @@ public struct MealForm: View {
         let range = start...end
         return DatePicker(
             "",
-            selection: $pickerTime,
+            selection: $time,
             in: range,
             displayedComponents: [.date]
         )
@@ -254,7 +254,7 @@ public struct MealForm: View {
         let end = date.moveDayBy(1).atEndOfWeeHours
         let range = start...end
         return DatePicker("",
-                   selection: $pickerTime,
+                   selection: $time,
                    in: range,
                    displayedComponents: [.date, .hourAndMinute])
             .datePickerStyle(.compact)
