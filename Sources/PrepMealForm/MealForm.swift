@@ -287,7 +287,6 @@ public struct MealForm: View {
     var timePicker: some View {
         let binding = Binding<Date>(
             get: {
-                print("Returning \(time)")
                 return time
             },
             set: { newValue in
