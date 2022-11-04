@@ -280,9 +280,18 @@ public struct MealForm: View {
     }
     
     var timePicker: some View {
-        TimeForm(
+        let binding = Binding<Date>(
+            get: {
+                print("Returning \(time)")
+                return time
+            },
+            set: { newValue in
+                time = newValue
+            }
+        )
+        return TimeForm(
             name: name,
-            time: $time,
+            time: binding,
             date: date,
             getTimelineItemsHandler: getTimelineItemsHandler
         )
