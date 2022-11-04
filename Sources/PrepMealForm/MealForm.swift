@@ -259,6 +259,11 @@ public struct MealForm: View {
                    displayedComponents: [.date, .hourAndMinute])
             .datePickerStyle(.compact)
             .labelsHidden()
+            .onChange(of: time, perform: onChangeOfTime)
+    }
+    
+    func onChangeOfTime(_ time: Date) {
+        print("Time changed to: \(time)")
     }
 
     @ViewBuilder
