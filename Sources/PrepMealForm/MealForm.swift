@@ -263,7 +263,7 @@ public struct MealForm: View {
     }
     
     func onChangeOfTime(_ time: Date) {
-        print("Time changed to: \(time)")
+        /// For some reason, not having this `onChange` modifier doesn't update the `time` when we pick one using the `DatePicker`, so we're leaving it in here
     }
 
     @ViewBuilder
