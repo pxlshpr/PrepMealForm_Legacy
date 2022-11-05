@@ -60,19 +60,12 @@ public struct MealForm: View {
 //    }
     
     var navigationLeadingButton: some ToolbarContent {
-        ToolbarItemGroup(placement: .navigationBarLeading) {
+        ToolbarItemGroup(placement: .navigationBarTrailing) {
             Button {
                 Haptics.feedback(style: .soft)
                 dismiss()
             } label: {
-                Image(systemName: "multiply.circle.fill")
-                    .font(.system(size: 20))
-                    .symbolRenderingMode(.palette)
-                    .foregroundStyle(
-                        Color(.tertiaryLabel),
-                        Color(.quaternaryLabel)
-                            .opacity(0.5)
-                    )
+                closeButtonLabel
             }
         }
     }

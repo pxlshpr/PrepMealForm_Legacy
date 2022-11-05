@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/NamePicker",
       "state" : {
-        "revision" : "cc30a82f6b9b5090b08e8025227819ec900bc2d8",
-        "version" : "0.0.19"
+        "revision" : "1572246467af87895149646e28bdb53b96f42cd1",
+        "version" : "0.0.20"
       }
     },
     {
@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/PrepDataTypes",
       "state" : {
-        "revision" : "8668e2c0c9945b3c97b31f0500c004a01c4e3057",
-        "version" : "0.0.79"
+        "revision" : "b717821457563861972337422b6bffb13c592f37",
+        "version" : "0.0.107"
       }
     },
     {
@@ -41,8 +41,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/SwiftSugar",
       "state" : {
-        "revision" : "8215ef9562438698a24e17bb70cb5cb43eabc61a",
-        "version" : "0.0.77"
+        "revision" : "3ef3d92d9dc3fe6fce56cb244a8ca3840a081be9",
+        "version" : "0.0.85"
       }
     },
     {
@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/SwiftUISugar",
       "state" : {
-        "revision" : "f03a0f7e5870c576403d8cdfd5ffe2abd83d8698",
-        "version" : "0.0.210"
+        "revision" : "da52b5e9c1193bc2ab3f5fa215e0fca87a6004e0",
+        "version" : "0.0.214"
       }
     },
     {
@@ -59,8 +59,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/Timeline",
       "state" : {
-        "revision" : "291b1bdac25531e61266f14fc93d964900f99238",
-        "version" : "0.0.56"
+        "revision" : "9088c4f31fd1273cc9fb993ac88901a198b932d9",
+        "version" : "0.0.64"
       }
     }
   ],
