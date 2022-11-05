@@ -232,6 +232,7 @@ public struct MealForm: View {
                 .padding(.horizontal, 7)
 //                .padding(3)
         }
+        .foregroundColor(Color(.tertiaryLabel))
         .buttonStyle(BorderlessButtonStyle())
     }
     
