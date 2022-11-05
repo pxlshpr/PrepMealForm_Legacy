@@ -108,6 +108,7 @@ public struct MealForm: View {
                         Image(systemName: "square.grid.3x2")
                     }
                 }
+                
                 .padding(.top, 15)
                 .padding(.bottom, 5)
                 .padding(.horizontal, 17)
