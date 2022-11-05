@@ -60,7 +60,7 @@ public struct MealForm: View {
 //    }
     
     var navigationLeadingButton: some ToolbarContent {
-        ToolbarItemGroup(placement: .navigationBarTrailing) {
+        ToolbarItemGroup(placement: .navigationBarLeading) {
             Button {
                 Haptics.feedback(style: .soft)
                 dismiss()
@@ -111,14 +111,19 @@ public struct MealForm: View {
                 .padding(.top, 15)
                 .padding(.bottom, 5)
                 .padding(.horizontal, 17)
-                Divider()
-                    .padding(.leading, 17)
+//                Divider()
+//                    .padding(.leading, 17)
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack {
                         ForEach(Presets.indices, id: \.self) { index in
-                            buttonLabel(Presets[index])
-                                .padding(.leading, index == 0 ? 17 : 0)
-                                .padding(.trailing, index ==  Presets.count - 1 ? 17 : 0)
+                            Button {
+                                Haptics.feedback(style: .rigid)
+                                name = Presets[index]
+                            } label: {
+                                buttonLabel(Presets[index])
+                                    .padding(.leading, index == 0 ? 17 : 0)
+                                    .padding(.trailing, index ==  Presets.count - 1 ? 17 : 0)
+                            }
                         }
                     }
                 }
