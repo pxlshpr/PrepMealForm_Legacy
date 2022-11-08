@@ -67,8 +67,9 @@ struct TimeForm: View {
         Timeline(
             items: timelineItems,
             newItem: newMeal,
+            didTapInterval: didTapInterval,
             didTapOnNewItem: didTapOnNewItem,
-            delegate: viewModel
+            didTapNow: didTapNow
         )
         .background(Color(.systemGroupedBackground))
     }
@@ -206,5 +207,25 @@ struct TimeForm: View {
                 self.timelineItems = timelineItems
             }
         }
+    }
+}
+
+extension TimeForm {
+    func didTapInterval(between item1: TimelineItem, and item2: TimelineItem) {
+        guard !(item1.isNew || item2.isNew) else {
+            return
+        }
+        guard item2.date > item1.date else {
+            return
+        }
+        let midPoint = ((item2.date.timeIntervalSince1970 - item1.date.timeIntervalSince1970) / 2.0) + item1.date.timeIntervalSince1970
+        let midPointDate = Date(timeIntervalSince1970: midPoint)
+        withAnimation {
+            viewModel.time = midPointDate
+        }
+    }
+    
+    func didTapNow() {
+        viewModel.time = Date()
     }
 }

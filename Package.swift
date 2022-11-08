@@ -20,7 +20,7 @@ let package = Package(
         .package(url: "https://github.com/pxlshpr/SwiftHaptics", from: "0.1.3"),
         .package(url: "https://github.com/pxlshpr/SwiftSugar", from: "0.0.83"),
         .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.214"),
-        .package(url: "https://github.com/pxlshpr/Timeline", from: "0.0.63"),
+        .package(url: "https://github.com/pxlshpr/Timeline", from: "0.0.67"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
