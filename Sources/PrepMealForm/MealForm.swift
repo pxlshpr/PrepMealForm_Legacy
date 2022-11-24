@@ -89,6 +89,7 @@ public struct MealForm: View {
             nameSection
             timeSection
             goalSetSection
+            goalWorkoutDurationSection
         }
     }
     
@@ -101,8 +102,8 @@ public struct MealForm: View {
             HStack {
                 TextField("Name", text: $name)
                     .focused($isFocused)
-                    .font(.title2)
-                    .fontWeight(.semibold)
+//                    .font(.title2)
+//                    .fontWeight(.semibold)
                 Spacer()
                 Button {
                     path.append(.name)
@@ -114,24 +115,12 @@ public struct MealForm: View {
             .padding(.horizontal, 17)
         }
     }
-    
-    func buttonLabel(_ string: String) -> some View {
-        Text(string)
-          .foregroundColor(Color(.secondaryLabel))
-          .padding(.vertical, 6)
-          .padding(.horizontal, 8)
-          .background(
-//            Capsule(style: .continuous)
-            RoundedRectangle(cornerRadius: 5.0, style: .continuous)
-                  .fill(Color(.secondarySystemFill))
-          )
-    }
-    
+
     var timeSection: some View {
         FormStyledSection(header: Text("Time")) {
             HStack {
                 datePickerTime
-                    .font(.title3)
+//                    .font(.title3)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Spacer()
                 Button {
@@ -144,7 +133,7 @@ public struct MealForm: View {
     }
     
     var goalSetSection: some View {
-        var typeRow: some View {
+        FormStyledSection(header: Text("Type")) {
             HStack {
                 Text("Pre-Workout Meal")
 //                    .foregroundColor(.accentColor)
@@ -155,35 +144,37 @@ public struct MealForm: View {
                     .foregroundColor(.secondary)
             }
         }
-        
-        var workoutRow: some View {
+    }
+    
+    var goalWorkoutDurationSection: some View {
+        FormStyledSection(header: Text("Workout Duration")) {
             HStack {
-                Text("Workout Duration")
-                    .foregroundColor(.secondary)
-                Spacer()
                 HStack {
-                    Text("1 h")
+                    Text("1 hour")
                     Image(systemName: "chevron.up.chevron.down")
                         .imageScale(.small)
                         .foregroundColor(.secondary)
-                    Text("30 m")
+                    Text("30 min.")
                     Image(systemName: "chevron.up.chevron.down")
                         .imageScale(.small)
                         .foregroundColor(.secondary)
                 }
+                Spacer()
             }
         }
-        return FormStyledSection(header: Text("Type"), horizontalPadding: 0) {
-            VStack {
-                typeRow
-                    .padding(.horizontal, 17)
-                Divider()
-                    .padding(.vertical, 5)
-                    .padding(.leading, 20)
-                workoutRow
-                    .padding(.horizontal, 17)
-            }
-        }
+    }
+    
+    
+    func buttonLabel(_ string: String) -> some View {
+        Text(string)
+          .foregroundColor(Color(.secondaryLabel))
+          .padding(.vertical, 6)
+          .padding(.horizontal, 8)
+          .background(
+//            Capsule(style: .continuous)
+            RoundedRectangle(cornerRadius: 5.0, style: .continuous)
+                  .fill(Color(.secondarySystemFill))
+          )
     }
     
     func button(increment: Int? = nil, decrement: Int? = nil, hapticStyle: UIImpactFeedbackGenerator.FeedbackStyle = .soft) -> some View
