@@ -88,6 +88,7 @@ public struct MealForm: View {
         FormStyledScrollView {
             nameSection
             timeSection
+            goalSetSection
         }
     }
     
@@ -97,52 +98,20 @@ public struct MealForm: View {
             horizontalPadding: 0,
             verticalPadding: 0
         ) {
-            VStack {
-                HStack {
-                    TextField("Name", text: $name)
-                        .focused($isFocused)
-                    Spacer()
-                    Button {
-                        path.append(.name)
-                    } label: {
-                        Image(systemName: "square.grid.3x2")
-                    }
+            HStack {
+                TextField("Name", text: $name)
+                    .focused($isFocused)
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                Spacer()
+                Button {
+                    path.append(.name)
+                } label: {
+                    Image(systemName: "square.grid.3x2")
                 }
-                
-                .padding(.top, 15)
-                .padding(.bottom, 5)
-                .padding(.horizontal, 17)
-//                Divider()
-//                    .padding(.leading, 17)
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
-                        ForEach(Presets.indices, id: \.self) { index in
-                            Button {
-                                Haptics.feedback(style: .rigid)
-                                name = Presets[index]
-                            } label: {
-                                buttonLabel(Presets[index])
-                                    .padding(.leading, index == 0 ? 17 : 0)
-                                    .padding(.trailing, index ==  Presets.count - 1 ? 17 : 0)
-                            }
-                        }
-                    }
-                }
-                .listRowInsets(.init(top: 2, leading: 0, bottom: 2, trailing: 0))
-                .padding(.top, 5)
-                .padding(.bottom, 15)
             }
-//            Button {
-//                path.append(.name)
-//            } label: {
-//                if name.isEmpty {
-//                    Text("Required")
-//                        .foregroundColor(.secondary)
-//                } else {
-//                    Text(name)
-//                        .foregroundColor(.primary)
-//                }
-//            }
+            .padding(.vertical, 15)
+            .padding(.horizontal, 17)
         }
     }
     
@@ -158,47 +127,61 @@ public struct MealForm: View {
           )
     }
     
-    @ViewBuilder
-    var timeSectionHeader: some View {
-        if date.isToday {
-            Text("Time, " + (time.isToday ? "Today" : "Tomorrow"))
-        } else {
-            Text("Time")
+    var timeSection: some View {
+        FormStyledSection(header: Text("Time")) {
+            HStack {
+                datePickerTime
+                    .font(.title3)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer()
+                Button {
+                    path.append(.time)
+                } label: {
+                    Image(systemName: "calendar.day.timeline.left")
+                }
+            }
         }
     }
     
-    var timeSection: some View {
-        FormStyledSection(header: timeSectionHeader) {
+    var goalSetSection: some View {
+        var typeRow: some View {
             HStack {
-                ZStack {
-                    HStack {
-                        Button("Now") {
-                            self.time = Date()
-                            //                            self.pickerTime = Date()
-                        }
-                        Spacer()
-                        Button {
-                            path.append(.time)
-                        } label: {
-                            Image(systemName: "calendar.day.timeline.left")
-                        }
-                    }
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack {
-                            datePickerTime
-                                .frame(maxWidth: .infinity, alignment: .center)
-                        }
-                        HStack(spacing: 0) {
-                            button(decrement: 60, hapticStyle: .heavy)
-                            button(decrement: 15)
-                            Text("•")
-                                .foregroundColor(Color(.quaternaryLabel))
-                            button(increment: 15)
-                            button(increment: 60, hapticStyle: .heavy)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .center)
-                    }
+                Text("Pre-Workout Meal")
+//                    .foregroundColor(.accentColor)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .imageScale(.small)
+                    .fontWeight(.medium)
+                    .foregroundColor(.secondary)
+            }
+        }
+        
+        var workoutRow: some View {
+            HStack {
+                Text("Workout Duration")
+                    .foregroundColor(.secondary)
+                Spacer()
+                HStack {
+                    Text("1 h")
+                    Image(systemName: "chevron.up.chevron.down")
+                        .imageScale(.small)
+                        .foregroundColor(.secondary)
+                    Text("30 m")
+                    Image(systemName: "chevron.up.chevron.down")
+                        .imageScale(.small)
+                        .foregroundColor(.secondary)
                 }
+            }
+        }
+        return FormStyledSection(header: Text("Type"), horizontalPadding: 0) {
+            VStack {
+                typeRow
+                    .padding(.horizontal, 17)
+                Divider()
+                    .padding(.vertical, 5)
+                    .padding(.leading, 20)
+                workoutRow
+                    .padding(.horizontal, 17)
             }
         }
     }
