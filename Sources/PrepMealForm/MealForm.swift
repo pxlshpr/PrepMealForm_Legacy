@@ -135,7 +135,7 @@ public struct MealForm: View {
     var goalSetSection: some View {
         FormStyledSection(header: Text("Type")) {
             HStack {
-                Text("Pre-Workout Meal")
+                Text("🏋🏽‍♂️ Pre-Workout Meal")
 //                    .foregroundColor(.accentColor)
                 Spacer()
                 Image(systemName: "chevron.right")
