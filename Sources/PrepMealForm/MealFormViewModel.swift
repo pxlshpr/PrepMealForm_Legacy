@@ -1,4 +1,5 @@
 import SwiftUI
+import PrepDataTypes
 
 public class MealFormViewModel: ObservableObject {
     
@@ -10,7 +11,9 @@ public class MealFormViewModel: ObservableObject {
     @Published var name = ""
     @Published var time: Date
     
-    let didSetValues: (String, Date) -> ()
+    @Published var goalSet: GoalSet?
+    
+    let didSave: (String, Date, GoalSet?) -> ()
     let getTimelineItemsHandler: GetTimelineItemsHandler?
 
     public init(
@@ -19,14 +22,14 @@ public class MealFormViewModel: ObservableObject {
         recents: [String] = [],
         presets: [String]? = nil,
         getTimelineItemsHandler: GetTimelineItemsHandler? = nil,
-        didSetValues: @escaping (String, Date) -> ()
+        didSave: @escaping (String, Date, GoalSet?) -> ()
     ) {
         self.date = date
         self.recents = recents
         self.presets = presets ?? Presets
         self.time = date
         self.name = name
-        self.didSetValues = didSetValues
+        self.didSave = didSave
         self.getTimelineItemsHandler = getTimelineItemsHandler
     }
     
@@ -76,7 +79,12 @@ extension MealFormViewModel {
     }
     
     func tappedAdd() {
-        didSetValues(name, time)
+        didSave(name, time, goalSet)
+    }
+    
+    var shouldShowDurationPicker: Bool {
+        guard let goalSet else { return false }
+        return goalSet.containsWorkoutDurationDependentGoal
     }
 }
 

@@ -17,7 +17,7 @@ public struct MealForm: View {
         recents: [String] = [],
         presets: [String]? = nil,
         getTimelineItemsHandler: GetTimelineItemsHandler? = nil,
-        didSetValues: @escaping (String, Date) -> ()
+        didSave: @escaping (String, Date, GoalSet?) -> ()
     ) {
         let viewModel = MealFormViewModel(
             date: date,
@@ -25,7 +25,7 @@ public struct MealForm: View {
             recents: recents,
             presets: presets,
             getTimelineItemsHandler: getTimelineItemsHandler,
-            didSetValues: didSetValues
+            didSave: didSave
         )
         
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -136,14 +136,24 @@ public struct MealForm: View {
                     Text("Type")
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text("🏋🏽‍♂️ Pre-Workout Meal")
-//                        .foregroundColor(.primary)
-                        .foregroundColor(.accentColor)
+                    goalSetLabel
                     Image(systemName: "chevron.right")
                         .imageScale(.small)
                         .fontWeight(.medium)
                         .foregroundColor(.secondary)
                 }
+            }
+        }
+        
+        @ViewBuilder
+        var goalSetLabel: some View {
+            if let goalSet = viewModel.goalSet {
+                Text("\(goalSet.emoji) \(goalSet.name)")
+                    .foregroundColor(.primary)
+            } else {
+                Text("Select")
+                    .foregroundColor(.accentColor)
+//                    .foregroundColor(Color(.secondaryLabel))
             }
         }
         
@@ -175,13 +185,23 @@ public struct MealForm: View {
                 .padding(.leading, 20)
         }
         
-        return FormStyledSection(horizontalPadding: 0) {
+        @ViewBuilder
+        var footer: some View {
+            if viewModel.shouldShowDurationPicker {
+                Text("Workout duration is used to calculate the carbohydrate goal for this meal type.")
+//                Text("Workout duration is used to calculate the carbohydrate, protein and sodium goals for this meal type.")
+            }
+        }
+        
+        return FormStyledSection(footer: footer, horizontalPadding: 0) {
             VStack {
                 pickerRow
                     .padding(.horizontal, 17)
-                divider
-                durationRow
-                    .padding(.horizontal, 17)
+                if viewModel.shouldShowDurationPicker {
+                    divider
+                    durationRow
+                        .padding(.horizontal, 17)
+                }
             }
         }
     }
@@ -285,13 +305,13 @@ public struct MealForm: View {
         GoalSetPicker(
             meal: nil,
             showCloseButton: false,
-            selectedGoalSet: nil,
+            selectedGoalSet: viewModel.goalSet,
             didSelectGoalSet: didSelectGoalSet
         )
     }
     
     func didSelectGoalSet(_ goalSet: GoalSet?, day: Day?) {
-        print("We here")
+        viewModel.goalSet = goalSet
     }
     
     //MARK: - Actions
@@ -328,7 +348,7 @@ struct MealFormPreview: View {
             recents: ["Recents", "go here"],
             presets: Presets,
             getTimelineItemsHandler: getTimelineItems
-        ) { name, date in
+        ) { name, date, goalSet in
             
         }
         .presentationDetents([.medium, .large])

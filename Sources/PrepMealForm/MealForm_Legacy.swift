@@ -14,7 +14,7 @@ public struct MealForm_Legacy: View {
     let recents: [String]
     let presets: [String]
     
-    let didSetValues: (String, Date) -> ()
+    let didSave: (String, Date) -> ()
     let getTimelineItemsHandler: GetTimelineItemsHandler?
 
     public init(
@@ -23,13 +23,13 @@ public struct MealForm_Legacy: View {
         recents: [String] = [],
         presets: [String] = [],
         getTimelineItemsHandler: GetTimelineItemsHandler? = nil,
-        didSetValues: @escaping (String, Date) -> ()
+        didSave: @escaping (String, Date) -> ()
     ) {
         self.date = date
         self.getTimelineItemsHandler = getTimelineItemsHandler
         self.recents = recents
         self.presets = presets
-        self.didSetValues = didSetValues
+        self.didSave = didSave
 
         //TODO: We need to assign time here based on the date provided
         _time = State(initialValue: date)
@@ -133,7 +133,7 @@ public struct MealForm_Legacy: View {
     }
     
     func tappedAdd() {
-        didSetValues(name, time)
+        didSave(name, time)
         Haptics.feedback(style: .soft)
         dismiss()
     }
