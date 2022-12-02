@@ -45,23 +45,31 @@ public struct MealForm: View {
     
     var navigationLeadingButton: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarLeading) {
-            Button {
-                Haptics.feedback(style: .soft)
-                dismiss()
-            } label: {
-                closeButtonLabel
-            }
+            saveButton
+        }
+    }
+    
+    var saveButton: some View {
+        Button {
+            saveAndDismiss()
+        } label: {
+            Text("Add")
+                .bold()
+        }
+    }
+    
+    var closeButton: some View {
+        Button {
+            Haptics.feedback(style: .soft)
+            dismiss()
+        } label: {
+            closeButtonLabel
         }
     }
     
     var navigationTrailingButton: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarTrailing) {
-            Button {
-                saveAndDismiss()
-            } label: {
-                Text("Add")
-                    .bold()
-            }
+            closeButton
         }
     }
     var contents: some View {
