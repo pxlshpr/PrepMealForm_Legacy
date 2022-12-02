@@ -10,6 +10,15 @@
       }
     },
     {
+      "identity" : "emojipicker",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/EmojiPicker",
+      "state" : {
+        "revision" : "06245cff8ffebdcfaa17cb493d816288d20ef273",
+        "version" : "0.0.22"
+      }
+    },
+    {
       "identity" : "namepicker",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/NamePicker",
@@ -19,12 +28,57 @@
       }
     },
     {
+      "identity" : "prepcoredatastack",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/PrepCoreDataStack",
+      "state" : {
+        "revision" : "a603ea39eaa0cdc2c4c96c24eca2e4e2193a73af",
+        "version" : "0.0.25"
+      }
+    },
+    {
       "identity" : "prepdatatypes",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/PrepDataTypes",
       "state" : {
-        "revision" : "fb489abd0231fe9fd428905ff27399e1431cf061",
-        "version" : "0.0.186"
+        "revision" : "3c7f418e472abfd3bf42863a5c9d2ddadaed52bb",
+        "version" : "0.0.210"
+      }
+    },
+    {
+      "identity" : "prepdietform",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/PrepDietForm",
+      "state" : {
+        "revision" : "bf610e9a9e7b3230d9abd3df33ade718d386a078",
+        "version" : "0.0.129"
+      }
+    },
+    {
+      "identity" : "prepgoalsetslist",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/PrepGoalSetsList",
+      "state" : {
+        "revision" : "6953dc88240d9e331c8b8020d1b16ffd34fc1c81",
+        "version" : "0.0.4"
+      }
+    },
+    {
+      "identity" : "prepmocks",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/PrepMocks",
+      "state" : {
+        "revision" : "ecf161115522677d7b28a47f7bf2b4ac50831251",
+        "version" : "0.0.3"
+      }
+    },
+    {
+      "identity" : "prepviews",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pxlshpr/PrepViews",
+      "state" : {
+        "revision" : "c6f80e3d4c8544aa8fa98315241fcdda5b237375",
+        "version" : "0.0.123"
       }
     },
     {
@@ -46,12 +100,21 @@
       }
     },
     {
+      "identity" : "swiftuipager",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/fermoya/SwiftUIPager",
+      "state" : {
+        "revision" : "4ddc04c801aac143090bb14cf26603a3bf9c74cb",
+        "version" : "2.5.0"
+      }
+    },
+    {
       "identity" : "swiftuisugar",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pxlshpr/SwiftUISugar",
       "state" : {
-        "revision" : "9abad170d0994caf1fbcb8436ed301160a63be8f",
-        "version" : "0.0.234"
+        "revision" : "8a268c9ce9b1f6f53376a99d0807b22b7d142790",
+        "version" : "0.0.235"
       }
     },
     {

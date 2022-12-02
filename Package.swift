@@ -15,11 +15,12 @@ let package = Package(
             targets: ["PrepMealForm"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.186"),
         .package(url: "https://github.com/pxlshpr/NamePicker", from: "0.0.20"),
+        .package(url: "https://github.com/pxlshpr/PrepDataTypes", from: "0.0.210"),
+        .package(url: "https://github.com/pxlshpr/PrepGoalSetsList", from: "0.0.4"),
         .package(url: "https://github.com/pxlshpr/SwiftHaptics", from: "0.1.3"),
         .package(url: "https://github.com/pxlshpr/SwiftSugar", from: "0.0.86"),
-        .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.234"),
+        .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.235"),
         .package(url: "https://github.com/pxlshpr/Timeline", from: "0.0.68"),
     ],
     targets: [
@@ -28,8 +29,9 @@ let package = Package(
         .target(
             name: "PrepMealForm",
             dependencies: [
-                .product(name: "PrepDataTypes", package: "prepdatatypes"),
                 .product(name: "NamePicker", package: "namepicker"),
+                .product(name: "PrepDataTypes", package: "prepdatatypes"),
+                .product(name: "PrepGoalSetsList", package: "prepgoalsetslist"),
                 .product(name: "SwiftHaptics", package: "swifthaptics"),
                 .product(name: "SwiftSugar", package: "swiftsugar"),
                 .product(name: "SwiftUISugar", package: "swiftuisugar"),

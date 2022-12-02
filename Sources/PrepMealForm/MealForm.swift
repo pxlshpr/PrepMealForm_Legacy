@@ -2,26 +2,15 @@ import SwiftUI
 import SwiftHaptics
 import NamePicker
 import SwiftUISugar
-
-let Presets = ["Breakfast", "Lunch", "Dinner", "Pre-workout Meal", "Post-workout Meal", "Intra-workout Snack", "Snack", "Dinner Out", "Supper", "Midnight Snack"]
+import PrepGoalSetsList
 
 public struct MealForm: View {
 
+    @StateObject var viewModel: MealFormViewModel
+
     @Environment(\.dismiss) var dismiss
-    @State var name = ""
-    @State var path: [Route] = []
-
-    @State var time: Date
-//    @State var pickerTime: Date
-
-    let date: Date
-    let recents: [String]
-    let presets: [String]
-    
-    let didSetValues: (String, Date) -> ()
-    let getTimelineItemsHandler: GetTimelineItemsHandler?
-
     @FocusState var isFocused: Bool
+    
     public init(
         date: Date = Date(),
         name: String = "",
@@ -30,34 +19,29 @@ public struct MealForm: View {
         getTimelineItemsHandler: GetTimelineItemsHandler? = nil,
         didSetValues: @escaping (String, Date) -> ()
     ) {
-        self.date = date
-//        _pickerTime = State(initialValue: date)
-        self.getTimelineItemsHandler = getTimelineItemsHandler
-        self.recents = recents
-        self.presets = presets ?? Presets
-        self.didSetValues = didSetValues
-
-        //TODO: We need to assign time here based on the date provided
-        _time = State(initialValue: date)
-        _name = State(initialValue: name)
+        let viewModel = MealFormViewModel(
+            date: date,
+            name: name,
+            recents: recents,
+            presets: presets,
+            getTimelineItemsHandler: getTimelineItemsHandler,
+            didSetValues: didSetValues
+        )
+        
+        _viewModel = StateObject(wrappedValue: viewModel)
     }
     
     public var body: some View {
-        NavigationStack(path: $path) {
+        NavigationView {
             contents
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Add Meal")
+            .navigationBarTitleDisplayMode(.large)
             .toolbar { navigationTrailingButton }
             .toolbar { navigationLeadingButton }
             .navigationBarTitleDisplayMode(.inline)
-            .navigationDestination(for: Route.self, destination: navigationDestination)
-//            .onChange(of: time, perform: onChangeOfTime)
         }
     }
-    
-//    func onChangeOfTime(_ time: Date) {
-//        self.pickerTime = time
-//    }
     
     var navigationLeadingButton: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarLeading) {
@@ -73,7 +57,7 @@ public struct MealForm: View {
     var navigationTrailingButton: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarTrailing) {
             Button {
-                tappedAdd()
+                saveAndDismiss()
             } label: {
                 Text("Add")
                     .bold()
@@ -86,84 +70,121 @@ public struct MealForm: View {
 
     var form: some View {
         FormStyledScrollView {
-            nameSection
-            timeSection
+            detailsSection
             goalSetSection
-            goalWorkoutDurationSection
         }
     }
     
-    var nameSection: some View {
-        FormStyledSection(
-            header: Text("Name"),
-            horizontalPadding: 0,
-            verticalPadding: 0
-        ) {
-            HStack {
-                TextField("Name", text: $name)
-                    .focused($isFocused)
-//                    .font(.title2)
-//                    .fontWeight(.semibold)
-                Spacer()
-                Button {
-                    path.append(.name)
-                } label: {
-                    Image(systemName: "square.grid.3x2")
-                }
+    var detailsSection: some View {
+        var divider: some View {
+            Divider()
+                .padding(.vertical, 5)
+                .padding(.leading, 20)
+        }
+        
+        return FormStyledSection(horizontalPadding: 0) {
+            VStack {
+                nameRow
+                    .padding(.horizontal, 17)
+                divider
+                timeRow
+                    .padding(.horizontal, 17)
+//                .padding(.bottom, 5)
             }
-            .padding(.vertical, 15)
-            .padding(.horizontal, 17)
         }
     }
-
-    var timeSection: some View {
-        FormStyledSection(header: Text("Time")) {
-            HStack {
-                datePickerTime
-//                    .font(.title3)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Spacer()
-                Button {
-                    path.append(.time)
-                } label: {
-                    Image(systemName: "calendar.day.timeline.left")
-                }
+    
+    var nameRow: some View {
+        HStack {
+            Text("Name")
+                .foregroundColor(.secondary)
+            Spacer()
+            TextField("Name", text: $viewModel.name)
+                .multilineTextAlignment(.trailing)
+                .focused($isFocused)
+//                    .font(.title2)
+//                    .fontWeight(.semibold)
+            NavigationLink {
+                namePicker
+            } label: {
+                Image(systemName: "square.grid.3x2")
+            }
+        }
+    }
+    
+    var timeRow: some View {
+        HStack {
+            Text("Time")
+                .foregroundColor(.secondary)
+            Spacer()
+            datePickerTime
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            NavigationLink {
+                timePicker
+            } label: {
+                Image(systemName: "calendar.day.timeline.left")
             }
         }
     }
     
     var goalSetSection: some View {
-        FormStyledSection(header: Text("Type")) {
-            HStack {
-                Text("🏋🏽‍♂️ Pre-Workout Meal")
-//                    .foregroundColor(.accentColor)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .imageScale(.small)
-                    .fontWeight(.medium)
-                    .foregroundColor(.secondary)
-            }
-        }
-    }
-    
-    var goalWorkoutDurationSection: some View {
-        FormStyledSection(header: Text("Workout Duration")) {
-            HStack {
+        var pickerRow: some View {
+            NavigationLink {
+                goalSetPicker
+            } label: {
                 HStack {
-                    Text("1 hour")
-                    Image(systemName: "chevron.up.chevron.down")
-                        .imageScale(.small)
+                    Text("Type")
                         .foregroundColor(.secondary)
-                    Text("30 min.")
-                    Image(systemName: "chevron.up.chevron.down")
+                    Spacer()
+                    Text("🏋🏽‍♂️ Pre-Workout Meal")
+//                        .foregroundColor(.primary)
+                        .foregroundColor(.accentColor)
+                    Image(systemName: "chevron.right")
                         .imageScale(.small)
+                        .fontWeight(.medium)
                         .foregroundColor(.secondary)
                 }
+            }
+        }
+        
+        var durationRow: some View {
+            HStack {
+                Text("Workout Duration")
+                    .foregroundColor(.secondary)
                 Spacer()
+                durationPicker
+            }
+        }
+        
+        var durationPicker: some View {
+            HStack {
+                Text("1 hour")
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.footnote)
+                    .foregroundColor(Color(.tertiaryLabel))
+                Text("30 min.")
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.footnote)
+                    .foregroundColor(Color(.tertiaryLabel))
+            }
+        }
+        
+        var divider: some View {
+            Divider()
+                .padding(.vertical, 5)
+                .padding(.leading, 20)
+        }
+        
+        return FormStyledSection(horizontalPadding: 0) {
+            VStack {
+                pickerRow
+                    .padding(.horizontal, 17)
+                divider
+                durationRow
+                    .padding(.horizontal, 17)
             }
         }
     }
-    
     
     func buttonLabel(_ string: String) -> some View {
         Text(string)
@@ -177,21 +198,14 @@ public struct MealForm: View {
           )
     }
     
-    func button(increment: Int? = nil, decrement: Int? = nil, hapticStyle: UIImpactFeedbackGenerator.FeedbackStyle = .soft) -> some View
-    {
+    func button(
+        increment: Int? = nil,
+        decrement: Int? = nil,
+        hapticStyle: UIImpactFeedbackGenerator.FeedbackStyle = .soft
+    ) -> some View {
         Button {
-            let interval: TimeInterval
-            if let increment = increment {
-                interval = TimeInterval(increment)
-            } else if let decrement = decrement {
-                interval = TimeInterval(-decrement)
-            } else {
-                interval = 0
-            }
-            let newTime = time.addingTimeInterval(interval * 60)
-            self.time = newTime
-//            self.pickerTime = newTime
             Haptics.feedback(style: hapticStyle)
+            viewModel.didTapTimeButton()
         } label: {
             let systemName: String
             if let increment = increment {
@@ -211,111 +225,91 @@ public struct MealForm: View {
     }
     
     var datePicker: some View {
-        let start = date.startOfDay
-        let end = date.moveDayBy(1).atEndOfWeeHours
-        let range = start...end
-        return DatePicker(
+        DatePicker(
             "",
-            selection: $time,
-            in: range,
+            selection: $viewModel.time,
+            in: viewModel.dateRangeForPicker,
             displayedComponents: [.date]
         )
         .datePickerStyle(.compact)
         .labelsHidden()
     }
     var datePickerTime: some View {
-        let start = date.startOfDay
-        let end = date.moveDayBy(1).atEndOfWeeHours
-        let range = start...end
-        return DatePicker("",
-                   selection: $time,
-                   in: range,
-                   displayedComponents: [.date, .hourAndMinute])
-            .datePickerStyle(.compact)
-            .labelsHidden()
-            .onChange(of: time, perform: onChangeOfTime)
+        DatePicker(
+            "",
+            selection: $viewModel.time,
+            in: viewModel.dateRangeForPicker,
+            displayedComponents: [.date, .hourAndMinute]
+        )
+        .datePickerStyle(.compact)
+        .labelsHidden()
+        .onChange(of: viewModel.time, perform: onChangeOfTime)
     }
     
     func onChangeOfTime(_ time: Date) {
         /// For some reason, not having this `onChange` modifier doesn't update the `time` when we pick one using the `DatePicker`, so we're leaving it in here
     }
 
-    @ViewBuilder
-    func navigationDestination(for route: Route) -> some View {
-        switch route {
-        case .name:
-            namePicker
-        case .time:
-            timePicker
-        }
-    }
-    
-
     var addButton: some View {
         FormPrimaryButton(title: "Add") {
-            tappedAdd()
+            saveAndDismiss()
         }
         .animation(.none, value: isFocused)
     }
     
-    var timePicker: some View {
-        let binding = Binding<Date>(
-            get: {
-                return time
-            },
-            set: { newValue in
-                time = newValue
-            }
-        )
-        return TimeForm(
-            name: name,
-            time: binding,
-            date: date,
-            getTimelineItemsHandler: getTimelineItemsHandler
-        )
-    }
+    //MARK: - Pickers
     
     var namePicker: some View {
         NamePicker(
-            name: $name,
+            name: $viewModel.name,
             showTextField: false,
             showClearButton: true,
 //            focusOnAppear: true,
-            recentStrings: recents,
-            presetStrings: presets
+            recentStrings: viewModel.recents,
+            presetStrings: viewModel.presets
         )
         .navigationTitle("Meal Name")
         .navigationBarTitleDisplayMode(.large)
     }
     
-    var timeString: String {
-        if time.startOfDay == Date().startOfDay {
-            return "Today \(time.shortTimeString)"
-        } else {
-            return time.shortString
-        }
-    }
-
-    //MARK: - Actions
-    func didTapAddMealButton(notification: Notification) {
-        tappedAdd()
+    var timePicker: some View {
+        TimeForm(
+            name: viewModel.name,
+            time: viewModel.timeBinding,
+            date: viewModel.date,
+            getTimelineItemsHandler: viewModel.getTimelineItemsHandler
+        )
     }
     
-    func tappedAdd() {
-        didSetValues(name, time)
+    var goalSetPicker: some View {
+        GoalSetPicker(
+            meal: nil,
+            showCloseButton: false,
+            selectedGoalSet: nil,
+            didSelectGoalSet: didSelectGoalSet
+        )
+    }
+    
+    func didSelectGoalSet(_ goalSet: GoalSet?, day: Day?) {
+        print("We here")
+    }
+    
+    //MARK: - Actions
+    func didTapAddMealButton(notification: Notification) {
+        saveAndDismiss()
+    }
+    
+    func saveAndDismiss() {
+        viewModel.tappedAdd()
         Haptics.feedback(style: .soft)
         dismiss()
     }
-    
-    enum Route: Hashable {
-        case name
-        case time
-    }
 }
 
+//MARK: - 👁‍🗨 Previews
 import PrepDataTypes
 
-struct ContentView: View {
+struct MealFormPreview: View {
     
     @State var showingMealForm = true
     
@@ -353,8 +347,8 @@ struct ContentView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct MealForm_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        MealFormPreview()
     }
 }
