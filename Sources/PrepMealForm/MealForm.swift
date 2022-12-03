@@ -45,7 +45,7 @@ public struct MealForm: View {
     
     var navigationLeadingButton: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarLeading) {
-            saveButton
+            closeButton
         }
     }
     
@@ -69,7 +69,7 @@ public struct MealForm: View {
     
     var navigationTrailingButton: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarTrailing) {
-            closeButton
+            saveButton
         }
     }
     var contents: some View {
