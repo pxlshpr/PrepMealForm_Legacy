@@ -44,15 +44,3 @@ extension Date {
         return formatter.string(from: self)
     }
 }
-
-//TODO: Revisit this
-extension Date {
-    var isInWeeHours: Bool {
-        Calendar.current.component(.hour, from: self) <= 5
-    }
-    
-    var atEndOfWeeHours: Date {
-        Calendar.current.date(bySettingHour: 5, minute: 55, second: 00, of: self) ?? self
-    }
-}
-
