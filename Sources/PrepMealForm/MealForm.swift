@@ -12,16 +12,16 @@ public struct MealForm: View {
     @FocusState var isFocused: Bool
     
     public init(
-        date: Date = Date(),
-        name: String = "",
+        mealBeingEdited: DayMeal? = nil,
+        date: Date,
         recents: [String] = [],
         presets: [String]? = nil,
         getTimelineItemsHandler: GetTimelineItemsHandler? = nil,
         didSave: @escaping (String, Date, GoalSet?) -> ()
     ) {
         let viewModel = MealFormViewModel(
+            mealBeingEdited: mealBeingEdited,
             date: date,
-            name: name,
             recents: recents,
             presets: presets,
             getTimelineItemsHandler: getTimelineItemsHandler,
@@ -35,11 +35,12 @@ public struct MealForm: View {
         NavigationView {
             contents
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("Add Meal")
+            .navigationTitle(viewModel.navigationTitle)
             .navigationBarTitleDisplayMode(.large)
             .toolbar { navigationTrailingButton }
             .toolbar { navigationLeadingButton }
             .navigationBarTitleDisplayMode(.inline)
+            .interactiveDismissDisabled(viewModel.shouldDisableInteractiveDismiss)
         }
     }
     
@@ -53,9 +54,10 @@ public struct MealForm: View {
         Button {
             saveAndDismiss()
         } label: {
-            Text("Add")
+            Text(viewModel.saveButtonTitle)
                 .bold()
         }
+        .disabled(!viewModel.isDirty)
     }
     
     var closeButton: some View {
@@ -352,7 +354,6 @@ struct MealFormPreview: View {
     var mealForm: some View {
         MealForm(
             date: Date(),
-            name: "Meal 1",
             recents: ["Recents", "go here"],
             presets: Presets,
             getTimelineItemsHandler: getTimelineItems

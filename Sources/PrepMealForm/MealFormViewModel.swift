@@ -3,6 +3,7 @@ import PrepDataTypes
 
 public class MealFormViewModel: ObservableObject {
     
+    let mealBeingEdited: DayMeal?
     let date: Date
     
     let recents: [String]
@@ -17,18 +18,28 @@ public class MealFormViewModel: ObservableObject {
     let getTimelineItemsHandler: GetTimelineItemsHandler?
 
     public init(
-        date: Date = Date(),
-        name: String = "",
+        mealBeingEdited: DayMeal?,
+        date: Date,
         recents: [String] = [],
         presets: [String]? = nil,
         getTimelineItemsHandler: GetTimelineItemsHandler? = nil,
         didSave: @escaping (String, Date, GoalSet?) -> ()
     ) {
+        /// Keep in mind that this could be the day before what is indicated in `time`
+        /// if we're adding a meal in the wee-hours
         self.date = date
+        self.mealBeingEdited = mealBeingEdited
+        
+        if let mealBeingEdited {
+            self.time = Date(timeIntervalSince1970: mealBeingEdited.time)
+            self.name = mealBeingEdited.name
+        } else {
+            self.time = date
+            self.name = newMealName(for: date)
+        }
+        
         self.recents = recents
         self.presets = presets ?? Presets
-        self.time = date
-        self.name = name
         self.didSave = didSave
         self.getTimelineItemsHandler = getTimelineItemsHandler
     }
@@ -50,7 +61,7 @@ extension MealFormViewModel {
         }
         let newTime = time.addingTimeInterval(interval * 60)
         self.time = newTime
-//            self.pickerTime = newTime
+        //            self.pickerTime = newTime
     }
     
     var dateRangeForPicker: ClosedRange<Date> {
@@ -85,6 +96,34 @@ extension MealFormViewModel {
     var shouldShowDurationPicker: Bool {
         guard let goalSet else { return false }
         return goalSet.containsWorkoutDurationDependentGoal
+    }
+    
+    var isEditing: Bool {
+        mealBeingEdited != nil
+    }
+    
+    var navigationTitle: String {
+        isEditing ? "Edit Meal" : "Add Meal"
+    }
+    
+    var saveButtonTitle: String {
+        isEditing ? "Save" : "Add"
+    }
+    
+    var isDirty: Bool {
+        guard let mealBeingEdited else {
+            return true
+        }
+        return mealBeingEdited.name != name
+        || mealBeingEdited.time != time.timeIntervalSince1970
+        || mealBeingEdited.goalSet?.id != goalSet?.id
+    }
+    
+    var shouldDisableInteractiveDismiss: Bool {
+        guard let mealBeingEdited else {
+            return false
+        }
+        return isDirty
     }
 }
 
