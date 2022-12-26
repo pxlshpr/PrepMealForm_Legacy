@@ -46,7 +46,7 @@ public struct MealForm: View {
     
     var navigationLeadingButton: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarLeading) {
-            closeButton
+//            closeButton
         }
     }
     
@@ -331,7 +331,7 @@ public struct MealForm: View {
     
     func saveAndDismiss() {
         viewModel.tappedAdd()
-        Haptics.feedback(style: .soft)
+//        Haptics.feedback(style: .soft)
         dismiss()
     }
 }
@@ -356,10 +356,9 @@ struct MealFormPreview: View {
             date: Date(),
             recents: ["Recents", "go here"],
             presets: Presets,
-            getTimelineItemsHandler: getTimelineItems
-        ) { name, date, goalSet in
-            
-        }
+            getTimelineItemsHandler: getTimelineItems) { name, date, goalSet in
+                
+            }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.hidden)
     }
