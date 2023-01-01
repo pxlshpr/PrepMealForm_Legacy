@@ -3,6 +3,7 @@ import SwiftHaptics
 import NamePicker
 import SwiftUISugar
 import PrepGoalSetsList
+import PrepViews
 
 public struct MealForm: View {
 
@@ -10,7 +11,8 @@ public struct MealForm: View {
 
     @Environment(\.dismiss) var dismiss
     @FocusState var isFocused: Bool
-    
+    @State var showingDeleteConfirmation = false
+
     public init(
         mealBeingEdited: DayMeal? = nil,
         date: Date,
@@ -33,14 +35,13 @@ public struct MealForm: View {
     
     public var body: some View {
         NavigationView {
-            contents
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle(viewModel.navigationTitle)
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar { navigationTrailingButton }
-            .toolbar { navigationLeadingButton }
-            .navigationBarTitleDisplayMode(.inline)
-            .interactiveDismissDisabled(viewModel.shouldDisableInteractiveDismiss)
+            content
+                .background(Color(.systemGroupedBackground))
+                .navigationTitle(viewModel.navigationTitle)
+                .navigationBarTitleDisplayMode(.large)
+                .toolbar { navigationLeadingButton }
+                .navigationBarTitleDisplayMode(.inline)
+                .interactiveDismissDisabled(viewModel.shouldDisableInteractiveDismiss)
         }
     }
     
@@ -74,8 +75,92 @@ public struct MealForm: View {
             saveButton
         }
     }
-    var contents: some View {
-        form
+    
+    var saveButtons: some View {
+        var saveButton: some View {
+            FormPrimaryButton(title: viewModel.saveButtonTitle) {
+                Haptics.successFeedback()
+                saveAndDismiss()
+//                actionHandler(.save(viewModel.mealFoodItem, viewModel.dayMeal))
+//                actionHandler(.dismiss)
+            }
+        }
+        
+        var cancelButton: some View {
+            FormSecondaryButton(title: "Cancel") {
+                Haptics.feedback(style: .soft)
+                dismiss()
+//                actionHandler(.dismiss)
+            }
+        }
+
+        var deleteButton: some View {
+            FormSecondaryButton(title: "Delete", foregroundColor: NutrientMeter.ViewModel.Colors.Excess.fill) {
+                Haptics.selectionFeedback()
+                showingDeleteConfirmation = true
+            }
+        }
+
+        return VStack(spacing: 0) {
+            Divider()
+            VStack {
+                saveButton
+                    .padding(.top)
+                HStack {
+                    cancelButton
+                    deleteButton
+                }
+                .padding(.horizontal, 50)
+//                privateButton
+//                    .padding(.vertical)
+            }
+            .padding(.bottom, 30)
+        }
+        .background(.thinMaterial)
+    }
+    
+    var content: some View {
+        @ViewBuilder
+        var buttonsLayer: some View {
+//            if canBeSaved {
+                VStack {
+                    Spacer()
+                    saveButtons
+                }
+                .edgesIgnoringSafeArea(.bottom)
+                .transition(.move(edge: .bottom))
+//            }
+        }
+        
+        var deleteConfirmationActions: some View {
+            Button("Delete Meal", role: .destructive) {
+//                actionHandler(.delete)
+//                actionHandler(.dismiss)
+            }
+        }
+
+        var deleteConfirmationMessage: some View {
+            Text("Are you sure you want to delete this meal?")
+        }
+
+        var formLayer: some View {
+            form
+//                .safeAreaInset(edge: .bottom) { bottomSafeAreaInset }
+                .navigationTitle(viewModel.navigationTitle)
+//                .toolbar { trailingContents }
+                .scrollDismissesKeyboard(.interactively)
+                .confirmationDialog(
+                    "",
+                    isPresented: $showingDeleteConfirmation,
+                    actions: { deleteConfirmationActions },
+                    message: { deleteConfirmationMessage }
+                )
+        }
+        
+        return ZStack {
+            formLayer
+            buttonsLayer
+        }
     }
 
     var form: some View {
@@ -83,6 +168,7 @@ public struct MealForm: View {
             detailsSection
             goalSetSection
         }
+        .scrollDisabled(true)
     }
     
     var detailsSection: some View {
@@ -112,6 +198,11 @@ public struct MealForm: View {
             TextField("Name", text: $viewModel.name)
                 .multilineTextAlignment(.trailing)
                 .focused($isFocused)
+                .onReceive(NotificationCenter.default.publisher(for: UITextField.textDidBeginEditingNotification)) { obj in
+                    if let textField = obj.object as? UITextField {
+                        textField.selectedTextRange = textField.textRange(from: textField.beginningOfDocument, to: textField.endOfDocument)
+                    }
+                }
 //                    .font(.title2)
 //                    .fontWeight(.semibold)
             NavigationLink {
