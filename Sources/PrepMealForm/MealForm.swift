@@ -81,13 +81,15 @@ public struct MealForm: View {
 
     func keyboardDidHide(_ notification: Notification) {
         if delayedSaveAndDismiss {
-            saveAndDismiss()
+//            saveAndDismiss()
         }
     }
     
     func keyboardDidShow(_ notification: Notification) {
         if delayedSaveAndDismiss {
-            saveAndDismiss()
+            actuallySaveAndDismiss()
+            delayedSaveAndDismiss = false
+//            saveAndDismiss()
         }
     }
 
@@ -259,10 +261,16 @@ public struct MealForm: View {
             }
         }
         
+        let saveIsDisabledBinding = Binding<Bool>(
+            get: { !viewModel.isDirty },
+            set: { _ in }
+        )
+        
         return ZStack {
             formLayer
             FormSaveLayer(
                 collapsed: $collapsedButtons,
+                saveIsDisabled: saveIsDisabledBinding,
                 tappedCancel: tappedCancel,
                 tappedSave: saveAndDismiss,
                 tappedDelete: tappedDelete
@@ -551,20 +559,22 @@ public struct MealForm: View {
     func didTapAddMealButton(notification: Notification) {
         saveAndDismiss()
     }
+
+    func actuallySaveAndDismiss() {
+        dismiss()
+        if viewModel.isEditing {
+            Haptics.successFeedback()
+        }
+        viewModel.tappedAdd()
+    }
     
     func saveAndDismiss() {
-        
-        func actions() {
-            dismiss()
-            Haptics.successFeedback()
-            viewModel.tappedAdd()
-        }
         
         if isFocused && !collapsedButtons {
             isFocused = false
             delayedSaveAndDismiss = true
         } else {
-            actions()
+            actuallySaveAndDismiss()
         }
     }
 }
@@ -618,18 +628,26 @@ struct MealForm_Previews: PreviewProvider {
 
 struct FormSaveLayer: View {
     
-    @Binding var collapsed: Bool
+    @Binding var collapsedBinding: Bool
+    @State var collapsed: Bool
+    @Binding var saveIsDisabledBinding: Bool
+    @State var saveIsDisabled: Bool
+    
     let tappedCancel: () -> ()
     let tappedSave: () -> ()
     let tappedDelete: (() -> ())?
     
     init(
         collapsed: Binding<Bool>,
+        saveIsDisabled: Binding<Bool>,
         tappedCancel: @escaping () -> (),
         tappedSave: @escaping () -> (),
         tappedDelete: (() -> ())? = nil
     ) {
-        _collapsed = collapsed
+        _collapsedBinding = collapsed
+        _saveIsDisabledBinding = saveIsDisabled
+        _collapsed = State(initialValue: collapsed.wrappedValue)
+        _saveIsDisabled = State(initialValue: saveIsDisabled.wrappedValue)
         self.tappedSave = tappedSave
         self.tappedCancel = tappedCancel
         self.tappedDelete = tappedDelete
@@ -639,6 +657,20 @@ struct FormSaveLayer: View {
         VStack {
             Spacer()
             buttonsLayer
+        }
+        .onChange(of: collapsedBinding, perform: collapsedChanged)
+        .onChange(of: saveIsDisabledBinding, perform: saveIsDisabledChanged)
+    }
+    
+    func collapsedChanged(_ newValue: Bool) {
+        withAnimation(.interactiveSpring()) {
+            self.collapsed = newValue
+        }
+    }
+
+    func saveIsDisabledChanged(_ newValue: Bool) {
+        withAnimation(.interactiveSpring()) {
+            self.saveIsDisabled = newValue
         }
     }
 
@@ -689,6 +721,8 @@ struct FormSaveLayer: View {
         }
         .buttonStyle(.borderless)
         .position(x: xPosition, y: yPosition)
+        .disabled(saveIsDisabled)
+        .opacity(saveIsDisabled ? 0.2 : 1)
     }
     
     var dismissButton: some View {

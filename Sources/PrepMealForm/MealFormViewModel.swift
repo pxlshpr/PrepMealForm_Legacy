@@ -111,10 +111,11 @@ extension MealFormViewModel {
     }
     
     var isDirty: Bool {
+        
         guard let mealBeingEdited else {
-            return true
+            return !name.isEmpty
         }
-        return mealBeingEdited.name != name
+        return (mealBeingEdited.name != name && !name.isEmpty)
         || mealBeingEdited.time != time.timeIntervalSince1970
         || mealBeingEdited.goalSet?.id != goalSet?.id
     }
