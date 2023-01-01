@@ -12,6 +12,13 @@ public struct MealForm: View {
     @Environment(\.dismiss) var dismiss
     @FocusState var isFocused: Bool
     @State var showingDeleteConfirmation = false
+    @State var hasFocusedOnAppear: Bool = false
+    @State var hasCompletedFocusedOnAppearAnimation: Bool = false
+    
+    @State var collapsedButtons: Bool = true
+    
+    let keyboardWillHide = NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+    let keyboardWillShow = NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
 
     public init(
         mealBeingEdited: DayMeal? = nil,
@@ -42,6 +49,27 @@ public struct MealForm: View {
                 .toolbar { navigationLeadingButton }
                 .navigationBarTitleDisplayMode(.inline)
                 .interactiveDismissDisabled(viewModel.shouldDisableInteractiveDismiss)
+                .onReceive(keyboardWillHide, perform: keyboardWillHide)
+                .onReceive(keyboardWillShow, perform: keyboardWillShow)
+        }
+    }
+    
+    func keyboardWillHide(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double
+        else { return }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+            withAnimation(.interactiveSpring()) {
+                self.collapsedButtons = false
+            }
+        }
+    }
+
+    func keyboardWillShow(_ notification: Notification) {
+        guard hasCompletedFocusedOnAppearAnimation else { return }
+        withAnimation(.interactiveSpring()) {
+            self.collapsedButtons = true
         }
     }
     
@@ -78,12 +106,28 @@ public struct MealForm: View {
     
     var saveButtons: some View {
         var saveButton: some View {
-            FormPrimaryButton(title: viewModel.saveButtonTitle) {
+            Button {
                 Haptics.successFeedback()
                 saveAndDismiss()
-//                actionHandler(.save(viewModel.mealFoodItem, viewModel.dayMeal))
-//                actionHandler(.dismiss)
+            } label: {
+                Text(viewModel.saveButtonTitle)
+                    .bold()
+                    .foregroundColor(.white)
+                    .padding(.vertical)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .foregroundColor(.accentColor)
+                    )
+                    .padding(.horizontal)
+                    .padding(.horizontal)
             }
+            .buttonStyle(.borderless)
+            
+//            FormPrimaryButton(title: viewModel.saveButtonTitle) {
+//                Haptics.successFeedback()
+//                saveAndDismiss()
+//            }
         }
         
         var cancelButton: some View {
@@ -100,9 +144,28 @@ public struct MealForm: View {
                 showingDeleteConfirmation = true
             }
         }
+        
+        @ViewBuilder
+        var background: some View {
+            if collapsedButtons {
+                Color.clear
+                    .background(.thinMaterial)
+            }
+        }
+        
+        var collapsedButtons: Bool {
+            hasCompletedFocusedOnAppearAnimation && !isFocused
+        }
+        
+        @ViewBuilder
+        var divider: some View {
+            if collapsedButtons {
+                Divider()
+            }
+        }
 
         return VStack(spacing: 0) {
-            Divider()
+            divider
             VStack {
                 saveButton
                     .padding(.top)
@@ -114,23 +177,24 @@ public struct MealForm: View {
 //                privateButton
 //                    .padding(.vertical)
             }
-            .padding(.bottom, 30)
+//            .padding(.bottom, 30)
         }
-        .background(.thinMaterial)
+        .background(background)
     }
-    
-    var content: some View {
-        @ViewBuilder
-        var buttonsLayer: some View {
+
+    @ViewBuilder
+    var buttonsLayer: some View {
 //            if canBeSaved {
-                VStack {
-                    Spacer()
-                    saveButtons
-                }
-                .edgesIgnoringSafeArea(.bottom)
-                .transition(.move(edge: .bottom))
+            VStack {
+                Spacer()
+                saveButtons
+            }
+//                .edgesIgnoringSafeArea(.bottom)
+            .transition(.move(edge: .bottom))
 //            }
-        }
+    }
+
+    var content: some View {
         
         var deleteConfirmationActions: some View {
             Button("Delete Meal", role: .destructive) {
@@ -157,18 +221,54 @@ public struct MealForm: View {
                 )
         }
         
+        var tappedDelete: (() -> ())? {
+            if viewModel.isEditing {
+                return {
+                    showingDeleteConfirmation = true
+                }
+            } else {
+                return nil
+            }
+        }
+        
+        var tappedCancel: () -> () {
+            return {
+                dismiss()
+            }
+        }
+        
         return ZStack {
             formLayer
-            buttonsLayer
+            FormSaveLayer(
+                collapsed: $collapsedButtons,
+                tappedCancel: tappedCancel,
+                tappedSave: saveAndDismiss,
+                tappedDelete: tappedDelete
+            )
+//            buttonsLayer
         }
     }
 
     var form: some View {
         FormStyledScrollView {
-            detailsSection
-            goalSetSection
+            nameSection
+            timeSection
+//            detailsSection
+//            goalSetSection
         }
-        .scrollDisabled(true)
+    }
+    
+    var nameSection: some View {
+        FormStyledSection(header: Text("Name")) {
+            nameRow
+        }
+    }
+    
+    
+    var timeSection: some View {
+        FormStyledSection(header: Text("Time")) {
+            timeRow
+        }
     }
     
     var detailsSection: some View {
@@ -192,34 +292,44 @@ public struct MealForm: View {
     
     var nameRow: some View {
         HStack {
-            Text("Name")
-                .foregroundColor(.secondary)
-            Spacer()
             TextField("Name", text: $viewModel.name)
-                .multilineTextAlignment(.trailing)
+                .multilineTextAlignment(.leading)
                 .focused($isFocused)
                 .onReceive(NotificationCenter.default.publisher(for: UITextField.textDidBeginEditingNotification)) { obj in
                     if let textField = obj.object as? UITextField {
                         textField.selectedTextRange = textField.textRange(from: textField.beginningOfDocument, to: textField.endOfDocument)
                     }
                 }
-//                    .font(.title2)
-//                    .fontWeight(.semibold)
+                .font(.title2)
+                .fontWeight(.semibold)
             NavigationLink {
                 namePicker
             } label: {
                 Image(systemName: "square.grid.3x2")
             }
         }
+        .introspectTextField { uiTextField in
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                if !hasFocusedOnAppear {
+                    uiTextField.becomeFirstResponder()
+                    hasFocusedOnAppear = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        withAnimation(.easeIn) {
+                            hasCompletedFocusedOnAppearAnimation = true
+                        }
+                    }
+                }
+//                }
+        }
+//        .onAppear {
+//            isFocused = true
+//        }
     }
     
     var timeRow: some View {
         HStack {
-            Text("Time")
-                .foregroundColor(.secondary)
-            Spacer()
             datePickerTime
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(maxWidth: .infinity, alignment: .leading)
             NavigationLink {
                 timePicker
             } label: {
@@ -469,5 +579,225 @@ struct MealFormPreview: View {
 struct MealForm_Previews: PreviewProvider {
     static var previews: some View {
         MealFormPreview()
+    }
+}
+
+//MARK: To be moved
+
+import SwiftUI
+
+struct FormSaveLayer: View {
+    
+    @Binding var collapsed: Bool
+    let tappedCancel: () -> ()
+    let tappedSave: () -> ()
+    let tappedDelete: (() -> ())?
+    
+    init(
+        collapsed: Binding<Bool>,
+        tappedCancel: @escaping () -> (),
+        tappedSave: @escaping () -> (),
+        tappedDelete: (() -> ())? = nil
+    ) {
+        _collapsed = collapsed
+        self.tappedSave = tappedSave
+        self.tappedCancel = tappedCancel
+        self.tappedDelete = tappedDelete
+    }
+
+    var body: some View {
+        VStack {
+            Spacer()
+            buttonsLayer
+        }
+    }
+
+    var buttonHeight: CGFloat {
+        collapsed ? 38 : 52
+    }
+    
+    var buttonCornerRadius: CGFloat {
+        collapsed ? 19 : 10
+    }
+    
+    var height: CGFloat {
+        collapsed ? 70 : 128
+    }
+
+    var saveButton: some View {
+        var buttonWidth: CGFloat {
+            collapsed ? 100 : UIScreen.main.bounds.width - 60
+        }
+        
+        var xPosition: CGFloat {
+            collapsed
+            ? (100.0 / 2.0) + 20.0 + 38.0 + 10.0
+            : UIScreen.main.bounds.width / 2.0
+        }
+
+        var yPosition: CGFloat {
+            collapsed
+            ? (38.0 / 2.0) + 16.0
+            : (52.0/2.0) + 16.0
+        }
+
+        var shadowOpacity: CGFloat {
+            collapsed ? 0.2 : 0
+        }
+        return Button {
+            tappedSave()
+        } label: {
+            Text("Save")
+            .bold()
+            .foregroundColor(.white)
+            .frame(width: buttonWidth, height: buttonHeight)
+            .background(
+                RoundedRectangle(cornerRadius: buttonCornerRadius)
+                    .foregroundColor(.accentColor)
+                    .shadow(color: Color(.black).opacity(shadowOpacity), radius: 3, x: 0, y: 3)
+            )
+        }
+        .buttonStyle(.borderless)
+        .position(x: xPosition, y: yPosition)
+    }
+    
+    var dismissButton: some View {
+        var image: some View {
+            Image(systemName: "chevron.down")
+                .imageScale(.medium)
+                .fontWeight(.medium)
+                .foregroundColor(Color(.secondaryLabel))
+        }
+        
+        var text: some View {
+            Text("Cancel")
+                .foregroundColor(.secondary)
+        }
+        
+        var buttonWidth: CGFloat {
+            collapsed ? 38 : UIScreen.main.bounds.width - 60
+        }
+        
+        var xPosition: CGFloat {
+            collapsed
+            ? (38.0 / 2.0) + 20.0
+            : UIScreen.main.bounds.width / 2.0
+        }
+
+        var yPosition: CGFloat {
+            collapsed
+            ? (38.0 / 2.0) + 16.0
+            : (52.0/2.0) + 16.0 + 52 + 8
+        }
+
+        var label: some View {
+            HStack {
+                if collapsed {
+                    image
+                }
+                if !collapsed {
+                    text
+                }
+            }
+            .frame(width: buttonWidth, height: buttonHeight)
+            .background(
+                RoundedRectangle(cornerRadius: buttonCornerRadius)
+                    .foregroundStyle(.ultraThinMaterial)
+                    .shadow(color: Color(.black).opacity(0.2), radius: 3, x: 0, y: 3)
+                    .opacity(collapsed ? 1 : 0)
+            )
+            .position(x: xPosition, y: yPosition)
+        }
+        
+        return Button {
+            tappedCancel()
+        } label: {
+            label
+        }
+    }
+    
+    func deleteButton(_ action: @escaping () -> ()) -> some View {
+        var xPosition: CGFloat {
+            collapsed
+            ? (38.0 / 2.0) + 20.0
+            : UIScreen.main.bounds.width / 2.0
+        }
+
+        var yPosition: CGFloat {
+            collapsed
+            ? (38.0 / 2.0) + 16.0
+            : (52.0/2.0) + 16.0 + 52 + 8
+        }
+
+        var label: some View {
+            HStack {
+                Image(systemName: "trash")
+                    .imageScale(.medium)
+                    .fontWeight(.medium)
+                    .foregroundColor(.red)
+                Text("Delete")
+                    .foregroundColor(.red)
+                    .foregroundColor(.secondary)
+                    .padding(.trailing, 5)
+            }
+            .frame(width: 100, height: 38)
+            .background(
+                RoundedRectangle(cornerRadius: 19)
+                    .foregroundStyle(.ultraThinMaterial)
+                    .shadow(color: Color(.black).opacity(0.2), radius: 3, x: 0, y: 3)
+            )
+        }
+        
+        return Button {
+            action()
+        } label: {
+            label
+        }
+    }
+    
+    @ViewBuilder
+    var deleteButtonLayer: some View {
+        if let tappedDelete {
+            HStack {
+                Spacer()
+                deleteButton(tappedDelete)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 20)
+            .offset(y: collapsed ? (38/2.0) - 3 : -38 - 10)
+        }
+    }
+
+    var buttonsLayer: some View {
+        @ViewBuilder
+        var background: some View {
+            if !collapsed {
+                Color.clear
+                    .background(.thinMaterial)
+            }
+        }
+        
+        @ViewBuilder
+        var divider: some View {
+            if !collapsed {
+                Divider()
+            }
+        }
+        
+        var buttons: some View {
+            ZStack(alignment: .topLeading) {
+                saveButton
+                dismissButton
+                deleteButtonLayer
+            }
+            .frame(height: height)
+//            .background(.green)
+        }
+        
+        return VStack(spacing: 0) {
+            divider
+            buttons
+        }
+        .background(background)
     }
 }
