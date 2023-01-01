@@ -19,6 +19,10 @@ public struct MealForm: View {
     
     let keyboardWillHide = NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
     let keyboardWillShow = NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+    let keyboardDidHide = NotificationCenter.default.publisher(for: UIResponder.keyboardDidHideNotification)
+    let keyboardDidShow = NotificationCenter.default.publisher(for: UIResponder.keyboardDidShowNotification)
+
+    @State var delayedSaveAndDismiss: Bool = false
 
     public init(
         mealBeingEdited: DayMeal? = nil,
@@ -51,6 +55,8 @@ public struct MealForm: View {
                 .interactiveDismissDisabled(viewModel.shouldDisableInteractiveDismiss)
                 .onReceive(keyboardWillHide, perform: keyboardWillHide)
                 .onReceive(keyboardWillShow, perform: keyboardWillShow)
+                .onReceive(keyboardDidHide, perform: keyboardDidHide)
+                .onReceive(keyboardDidShow, perform: keyboardDidShow)
         }
     }
     
@@ -72,7 +78,20 @@ public struct MealForm: View {
             self.collapsedButtons = true
         }
     }
+
+    func keyboardDidHide(_ notification: Notification) {
+        if delayedSaveAndDismiss {
+            saveAndDismiss()
+        }
+    }
     
+    func keyboardDidShow(_ notification: Notification) {
+        if delayedSaveAndDismiss {
+            saveAndDismiss()
+        }
+    }
+
+
     var navigationLeadingButton: some ToolbarContent {
         ToolbarItemGroup(placement: .navigationBarLeading) {
 //            closeButton
@@ -198,8 +217,9 @@ public struct MealForm: View {
         
         var deleteConfirmationActions: some View {
             Button("Delete Meal", role: .destructive) {
-//                actionHandler(.delete)
-//                actionHandler(.dismiss)
+                Haptics.errorFeedback()
+                //TODO: Actually delete
+                dismiss()
             }
         }
 
@@ -224,6 +244,7 @@ public struct MealForm: View {
         var tappedDelete: (() -> ())? {
             if viewModel.isEditing {
                 return {
+                    Haptics.warningFeedback()
                     showingDeleteConfirmation = true
                 }
             } else {
@@ -233,6 +254,7 @@ public struct MealForm: View {
         
         var tappedCancel: () -> () {
             return {
+                Haptics.feedback(style: .soft)
                 dismiss()
             }
         }
@@ -531,9 +553,19 @@ public struct MealForm: View {
     }
     
     func saveAndDismiss() {
-        viewModel.tappedAdd()
-//        Haptics.feedback(style: .soft)
-        dismiss()
+        
+        func actions() {
+            dismiss()
+            Haptics.successFeedback()
+            viewModel.tappedAdd()
+        }
+        
+        if isFocused && !collapsedButtons {
+            isFocused = false
+            delayedSaveAndDismiss = true
+        } else {
+            actions()
+        }
     }
 }
 
@@ -583,8 +615,6 @@ struct MealForm_Previews: PreviewProvider {
 }
 
 //MARK: To be moved
-
-import SwiftUI
 
 struct FormSaveLayer: View {
     
@@ -706,7 +736,6 @@ struct FormSaveLayer: View {
                     .shadow(color: Color(.black).opacity(0.2), radius: 3, x: 0, y: 3)
                     .opacity(collapsed ? 1 : 0)
             )
-            .position(x: xPosition, y: yPosition)
         }
         
         return Button {
@@ -714,6 +743,7 @@ struct FormSaveLayer: View {
         } label: {
             label
         }
+        .position(x: xPosition, y: yPosition)
     }
     
     func deleteButton(_ action: @escaping () -> ()) -> some View {
@@ -786,8 +816,8 @@ struct FormSaveLayer: View {
         
         var buttons: some View {
             ZStack(alignment: .topLeading) {
-                saveButton
                 dismissButton
+                saveButton
                 deleteButtonLayer
             }
             .frame(height: height)
