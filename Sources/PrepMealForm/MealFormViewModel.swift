@@ -17,6 +17,9 @@ public class MealFormViewModel: ObservableObject {
     let didSave: (String, Date, GoalSet?) -> ()
     let getTimelineItemsHandler: GetTimelineItemsHandler?
 
+    let initialName: String?
+    let initialTime: Date?
+    
     public init(
         mealBeingEdited: DayMeal?,
         date: Date,
@@ -33,9 +36,16 @@ public class MealFormViewModel: ObservableObject {
         if let mealBeingEdited {
             self.time = Date(timeIntervalSince1970: mealBeingEdited.time)
             self.name = mealBeingEdited.name
+            
+            self.initialTime = nil
+            self.initialName = nil
         } else {
+            let name = newMealName(for: date)
             self.time = date
-            self.name = newMealName(for: date)
+            self.name = name
+            
+            self.initialTime = date
+            self.initialName = name
         }
         
         self.recents = recents
@@ -120,11 +130,18 @@ extension MealFormViewModel {
         || mealBeingEdited.goalSet?.id != goalSet?.id
     }
     
-    var shouldDisableInteractiveDismiss: Bool {
-        guard let mealBeingEdited else {
-            return false
+    var shouldConfirmCancellation: Bool {
+        if isEditing {
+            return isDirty
+        } else {
+            if initialName == name, initialTime == time {
+                return false
+            } else if name.isEmpty {
+                return false
+            } else {
+                return true
+            }
         }
-        return isDirty
     }
 }
 

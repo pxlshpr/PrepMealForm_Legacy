@@ -17,6 +17,8 @@ public struct MealForm: View {
     
     @State var collapsedButtons: Bool = true
     
+    @State var refreshDatePicker: Bool = false
+    
     let keyboardWillHide = NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
     let keyboardWillShow = NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
     let keyboardDidHide = NotificationCenter.default.publisher(for: UIResponder.keyboardDidHideNotification)
@@ -62,7 +64,6 @@ public struct MealForm: View {
                 .navigationBarTitleDisplayMode(.large)
                 .toolbar { navigationLeadingButton }
                 .navigationBarTitleDisplayMode(.inline)
-                .interactiveDismissDisabled(viewModel.shouldDisableInteractiveDismiss)
                 .onReceive(keyboardWillHide, perform: keyboardWillHide)
                 .onReceive(keyboardWillShow, perform: keyboardWillShow)
                 .onReceive(keyboardDidHide, perform: keyboardDidHide)
@@ -301,7 +302,7 @@ public struct MealForm: View {
         
         var cancelAction: FormConfirmableAction {
             FormConfirmableAction(
-                shouldConfirm: viewModel.isDirty,
+                shouldConfirm: viewModel.shouldConfirmCancellation,
                 handler: tappedCancel
             )
         }
@@ -312,10 +313,14 @@ public struct MealForm: View {
             )
         }
         
-        var deleteAction: FormConfirmableAction {
-            FormConfirmableAction(
-                handler: { tappedDelete?() }
-            )
+        var deleteAction: FormConfirmableAction? {
+            if viewModel.isEditing {
+                return FormConfirmableAction(
+                    handler: { tappedDelete?() }
+                )
+            } else {
+                return nil
+            }
         }
         
         return ZStack {
@@ -324,6 +329,7 @@ public struct MealForm: View {
                 collapsed: $collapsedButtons,
                 saveIsDisabled: saveIsDisabledBinding,
                 info: infoBinding,
+                preconfirmationAction: { refreshDatePicker.toggle() },
                 cancelAction: cancelAction,
                 saveAction: saveAction,
                 deleteAction: deleteAction
@@ -587,6 +593,7 @@ public struct MealForm: View {
         .datePickerStyle(.compact)
         .labelsHidden()
         .onChange(of: viewModel.time, perform: onChangeOfTime)
+        .id(refreshDatePicker)
     }
     
     func onChangeOfTime(_ time: Date) {
