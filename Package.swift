@@ -20,7 +20,7 @@ let package = Package(
         .package(url: "https://github.com/pxlshpr/PrepGoalSetsList", from: "0.0.4"),
         .package(url: "https://github.com/pxlshpr/SwiftHaptics", from: "0.1.3"),
         .package(url: "https://github.com/pxlshpr/SwiftSugar", from: "0.0.86"),
-        .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.235"),
+        .package(url: "https://github.com/pxlshpr/SwiftUISugar", from: "0.0.311"),
         .package(url: "https://github.com/pxlshpr/Timeline", from: "0.0.68"),
     ],
     targets: [

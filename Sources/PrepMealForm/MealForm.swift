@@ -24,6 +24,15 @@ public struct MealForm: View {
 
     @State var delayedSaveAndDismiss: Bool = false
 
+    @State var focusOnPop: Bool = false
+    
+    @State var path: [MealFormRoute] = []
+    
+    enum MealFormRoute: Hashable {
+        case namePicker
+        case timePicker
+    }
+    
     public init(
         mealBeingEdited: DayMeal? = nil,
         date: Date,
@@ -45,7 +54,8 @@ public struct MealForm: View {
     }
     
     public var body: some View {
-        NavigationView {
+        NavigationStack(path: $path) {
+//        NavigationView {
             content
                 .background(Color(.systemGroupedBackground))
                 .navigationTitle(viewModel.navigationTitle)
@@ -57,6 +67,17 @@ public struct MealForm: View {
                 .onReceive(keyboardWillShow, perform: keyboardWillShow)
                 .onReceive(keyboardDidHide, perform: keyboardDidHide)
                 .onReceive(keyboardDidShow, perform: keyboardDidShow)
+                .navigationDestination(for: MealFormRoute.self, destination: destination)
+        }
+    }
+    
+    @ViewBuilder
+    func destination(for route: MealFormRoute) -> some View {
+        switch route {
+        case .namePicker:
+            namePicker
+        case .timePicker:
+            timePicker
         }
     }
     
@@ -266,14 +287,46 @@ public struct MealForm: View {
             set: { _ in }
         )
         
+        var infoBinding: Binding<FormSaveInfo?> {
+            Binding<FormSaveInfo?>(
+                get: {
+                    guard viewModel.name.isEmpty else {
+                        return nil
+                    }
+                    return FormSaveInfo(title: "Name Required", systemImage: "exclamationmark.triangle.fill")
+                },
+                set: { _ in }
+            )
+        }
+        
+        var cancelAction: FormConfirmableAction {
+            FormConfirmableAction(
+                shouldConfirm: viewModel.isDirty,
+                handler: tappedCancel
+            )
+        }
+        
+        var saveAction: FormConfirmableAction {
+            FormConfirmableAction(
+                handler: { saveAndDismiss() }
+            )
+        }
+        
+        var deleteAction: FormConfirmableAction {
+            FormConfirmableAction(
+                handler: { tappedDelete?() }
+            )
+        }
+        
         return ZStack {
             formLayer
             FormSaveLayer(
                 collapsed: $collapsedButtons,
                 saveIsDisabled: saveIsDisabledBinding,
-                tappedCancel: tappedCancel,
-                tappedSave: saveAndDismiss,
-                tappedDelete: tappedDelete
+                info: infoBinding,
+                cancelAction: cancelAction,
+                saveAction: saveAction,
+                deleteAction: deleteAction
             )
 //            buttonsLayer
         }
@@ -322,7 +375,7 @@ public struct MealForm: View {
     
     var nameRow: some View {
         HStack {
-            TextField("Name", text: $viewModel.name)
+            TextField("Required", text: $viewModel.name)
                 .multilineTextAlignment(.leading)
                 .focused($isFocused)
                 .onReceive(NotificationCenter.default.publisher(for: UITextField.textDidBeginEditingNotification)) { obj in
@@ -332,8 +385,28 @@ public struct MealForm: View {
                 }
                 .font(.title2)
                 .fontWeight(.semibold)
-            NavigationLink {
-                namePicker
+//            NavigationLink {
+//                namePicker
+//                    .onAppear {
+//                        if isFocused {
+//                            focusOnPop = true
+//                        }
+//                    }
+//                    .onDisappear {
+//                        if focusOnPop {
+//                            isFocused = true
+//                            focusOnPop = false
+//                        }
+//                    }
+            Button {
+                if isFocused {
+                    isFocused = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        path.append(.namePicker)
+                    }
+                } else {
+                    path.append(.namePicker)
+                }
             } label: {
                 Image(systemName: "square.grid.3x2")
             }
@@ -360,8 +433,17 @@ public struct MealForm: View {
         HStack {
             datePickerTime
                 .frame(maxWidth: .infinity, alignment: .leading)
-            NavigationLink {
-                timePicker
+//            NavigationLink {
+//                timePicker
+            Button {
+                if isFocused {
+                    isFocused = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        path.append(.timePicker)
+                    }
+                } else {
+                    path.append(.timePicker)
+                }
             } label: {
                 Image(systemName: "calendar.day.timeline.left")
             }
