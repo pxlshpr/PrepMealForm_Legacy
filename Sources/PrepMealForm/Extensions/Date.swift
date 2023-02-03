@@ -31,6 +31,20 @@ extension Date {
 }
 
 extension Date {
+    func timeSlot(within date: Date) -> Int {
+        guard self > date.startOfDay else { return 0 }
+        let difference = self.timeIntervalSince1970 - date.startOfDay.timeIntervalSince1970
+        let slots = Int(difference / (15 * 60.0))
+        guard slots < K.numberOfSlots else { return 0 }
+        return slots
+    }
+    
+    func timeForTimeSlot(_ timeSlot: Int) -> Date {
+        Date(timeIntervalSince1970: startOfDay.timeIntervalSince1970 + (Double(timeSlot) * 15 * 60))
+    }
+}
+
+extension Date {
     var shortString: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM dd, h:mm a"
