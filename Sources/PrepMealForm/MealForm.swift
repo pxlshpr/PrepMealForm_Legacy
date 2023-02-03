@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftUISugar
 import PrepDataTypes
+import SwiftHaptics
 
 public struct MealForm: View {
 
@@ -8,11 +9,15 @@ public struct MealForm: View {
     
     let date: Date
     let existingMealTimes: [Date]
+    let existingMeal: DayMeal?
+    
     @State var name: String = ""
     
     @State var time: Date = Date()
     @State var lastTime: Date = Date()
-    
+
+    @State var showingNameForm = false
+
     public init(
         mealBeingEdited: DayMeal? = nil,
         date: Date,
@@ -24,6 +29,8 @@ public struct MealForm: View {
     ) {
         self.date = date
         self.existingMealTimes = existingMealTimes
+        self.existingMeal = mealBeingEdited
+        
 //        let viewModel = MealFormViewModel(
 //            mealBeingEdited: mealBeingEdited,
 //            date: date,
@@ -41,8 +48,13 @@ public struct MealForm: View {
             .presentationDetents([.height(400)])
             .presentationDragIndicator(.hidden)
             .onChange(of: time, perform: timeChanged)
+            .sheet(isPresented: $showingNameForm) { nameForm }
     }
     
+    var nameForm: some View {
+        NameForm(name: $name)
+    }
+
     var quickForm: some View {
         QuickForm(title: "New Meal") {
             FormStyledSection {
@@ -51,6 +63,8 @@ public struct MealForm: View {
                         Text("Name")
                             .foregroundColor(.secondary)
                         fieldButton(name, isRequired: true) {
+                            Haptics.feedback(style: .soft)
+                            showingNameForm = true
                         }
                     }
                     GridRow {

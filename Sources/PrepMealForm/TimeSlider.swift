@@ -2,10 +2,6 @@ import SwiftUI
 import SwiftUISugar
 import SwiftHaptics
 
-struct K {
-    static let numberOfSlots = 120
-}
-
 struct TimeSlider: View {
 
     let date: Date
