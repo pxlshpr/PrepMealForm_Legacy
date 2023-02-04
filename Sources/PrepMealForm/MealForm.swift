@@ -24,7 +24,10 @@ public struct MealForm: View {
     @State var existingMealTimes: [Date] = []
 
     let didSaveMeal: (String, Date, GoalSet?) -> ()
-    
+
+    @State var lastTime: Date = Date()
+    @State var refreshDatePicker: Bool = false
+
     public init(
         existingMeal: DayMeal? = nil,
         date: Date,
@@ -50,11 +53,13 @@ public struct MealForm: View {
 
     public var body: some View {
         quickForm
-            .presentationDetents([.height(370)])
+//            .presentationDetents([.height(370)])
+            .presentationDetents([.height(400)])
             .presentationDragIndicator(.hidden)
             .sheet(isPresented: $showingNameForm) { nameForm }
             .task { getExistingMealTimes() }
             .sheet(isPresented: $showingTimeForm) { timeForm }
+            .onChange(of: time, perform: timeChanged)
     }
     
     func getExistingMealTimes() {
@@ -91,9 +96,9 @@ public struct MealForm: View {
             title: existingMeal == nil ? "New Meal" : "Edit Meal",
             deleteAction: deleteActionBinding
         ) {
-            nameCell
-            timeCell
-//            legacySection
+//            nameCell
+//            timeCell
+            legacySection
             saveButton
         }
     }
@@ -211,29 +216,128 @@ public struct MealForm: View {
         }
     }
 
-//    var legacySection: some View {
-//        FormStyledSection {
-//            Grid(alignment: .leading) {
-//                GridRow {
-//                    Text("Name")
-//                        .foregroundColor(.secondary)
-//                    fieldButton(name, isRequired: true) {
-//                        Haptics.feedback(style: .soft)
-//                        showingNameForm = true
+    var legacySection: some View {
+        FormStyledSection {
+            Grid(alignment: .leading) {
+                GridRow {
+                    Text("Name")
+                        .foregroundColor(.secondary)
+                    fieldButton(name, isRequired: true) {
+                        Haptics.feedback(style: .soft)
+                        showingNameForm = true
+                    }
+                }
+                GridRow {
+                    Text("Time")
+                        .foregroundColor(.secondary)
+                    datePicker
+                }
+                GridRow {
+                    timeSlider
+                        .gridCellColumns(2)
+                }
+            }
+        }
+    }
+    
+//    var deleteActionBinding: Binding<FormConfirmableAction?> {
+//        Binding<FormConfirmableAction?>(
+//            get: {
+//                .init(
+//                    shouldConfirm: true,
+//                    confirmationMessage: "Are you sure you want to delete this meal?",
+//                    confirmationButtonTitle: "Delete Meal",
+//                    isDisabled: false,
+//                    buttonImage: "trash.fill",
+//                    handler: {
+//                        guard let existingMeal else {
+//                            return
+//                        }
+//                        do {
+//                            try DataManager.shared.deleteMeal(existingMeal)
+//                        } catch {
+//                            print("Couldn't delete meal: \(error)")
+//                        }
 //                    }
-//                }
-//                GridRow {
-//                    Text("Time")
-//                        .foregroundColor(.secondary)
-//                    datePicker
-//                }
-//                GridRow {
-//                    timeSlider
-//                        .gridCellColumns(2)
-//                }
-//            }
-//        }
+//                )
+//            },
+//            set: { _ in }
+//        )
 //    }
+
+    var datePicker: some View {
+        DatePicker(
+            "",
+            selection: $time,
+            in: dateRangeForPicker,
+            displayedComponents: [.date, .hourAndMinute]
+        )
+        .datePickerStyle(.compact)
+        .labelsHidden()
+        .onChange(of: time, perform: onChangeOfTime)
+        .id(refreshDatePicker)
+    }
+    
+    var timeSlider: some View {
+        TimeSlider(
+            date: self.date,
+            existingTimeSlots: existingTimeSlots,
+            currentTime: $time,
+            currentTimeSlot: currentTimeSlot
+        )
+    }
+    
+    func onChangeOfTime(_ time: Date) {
+        /// For some reason, not having this `onChange` modifier doesn't update the `time` when we pick one using the `DatePicker`, so we're leaving it in here
+    }
+
+    var dateRangeForPicker: ClosedRange<Date> {
+        let start = date.startOfDay
+        let end = date.moveDayBy(1).atEndOfWeeHours
+        return start...end
+    }
+    
+    func nearestAvailableTimeSlot(to timeSlot: Int) -> Int? {
+        
+        func timeSlotIsAvailable(_ timeSlot: Int) -> Bool {
+            timeSlot != self.currentTimeSlot && !existingTimeSlots.contains(timeSlot)
+        }
+        
+        /// First search forwards till the end
+        for t in timeSlot..<K.numberOfSlots {
+            if timeSlotIsAvailable(t) {
+                return t
+            }
+        }
+        /// If we still haven't find one, go backwards
+        for t in (0..<timeSlot-1).reversed() {
+            if timeSlotIsAvailable(t) {
+                return t
+            }
+        }
+        return nil
+    }
+    
+    var currentTimeSlot: Int {
+        time.timeSlot(within: date)
+    }
+    
+    var existingTimeSlots: [Int] {
+        existingMealTimes.map {
+            $0.timeSlot(within: date)
+        }
+    }
+    
+    func timeChanged(_ newTime: Date) {
+        let timeSlot = newTime.timeSlot(within: date)
+        if existingTimeSlots.contains(timeSlot) {
+            guard let nearestAvailable = nearestAvailableTimeSlot(to: timeSlot) else {
+                self.time = lastTime
+                return
+            }
+            self.time = date.timeForTimeSlot(nearestAvailable)
+        }
+    }
     
     var deleteActionBinding: Binding<FormConfirmableAction?> {
         Binding<FormConfirmableAction?>(
