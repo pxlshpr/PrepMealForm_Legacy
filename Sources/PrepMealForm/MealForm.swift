@@ -238,7 +238,10 @@ public struct MealForm: View {
     var deleteActionBinding: Binding<FormConfirmableAction?> {
         Binding<FormConfirmableAction?>(
             get: {
-                .init(
+                guard existingMeal != nil else {
+                    return nil
+                }
+                return FormConfirmableAction(
                     shouldConfirm: true,
                     confirmationMessage: "Are you sure you want to delete this meal?",
                     confirmationButtonTitle: "Delete Meal",

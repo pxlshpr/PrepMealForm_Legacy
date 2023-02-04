@@ -54,13 +54,14 @@ extension MealForm {
 extension MealForm.TimeForm {
     
     var body: some View {
-        QuickForm(title: "Time", saveAction: saveActionBinding) {
+        QuickForm(title: "Time") {
             timeSection
+            saveButton
         }
         .toolbar(.hidden, for: .navigationBar)
         .onChange(of: isFocused, perform: isFocusedChanged)
         .onChange(of: viewModel.internalTime, perform: timeChanged)
-        .presentationDetents([.height(370)])
+        .presentationDetents([.height(368)])
         .presentationDragIndicator(.hidden)
     }
     
@@ -89,13 +90,15 @@ extension MealForm.TimeForm {
     
     var timeSection: some View {
         FormStyledSection {
-            HStack {
-                Text("Time")
-                    .foregroundColor(.secondary)
-                datePicker
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+            VStack {
+                HStack {
+                    Text("Time")
+                        .foregroundColor(.secondary)
+                    datePicker
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+                timeSlider
             }
-            timeSlider
         }
     }
     
@@ -187,4 +190,52 @@ extension MealForm.TimeForm {
         }
     }
 
+    var saveButton: some View {
+        var buttonWidth: CGFloat {
+            UIScreen.main.bounds.width - (20 * 2.0)
+        }
+        
+        var xPosition: CGFloat {
+            UIScreen.main.bounds.width / 2.0
+        }
+        
+        var yPosition: CGFloat {
+            (52.0/2.0) + 16.0
+        }
+        
+        var shadowOpacity: CGFloat {
+            0
+        }
+        
+        var buttonHeight: CGFloat {
+            52
+        }
+        
+        var buttonCornerRadius: CGFloat {
+            10
+        }
+        
+        var shadowSize: CGFloat {
+            2
+        }
+
+        return Button {
+            dismissAfterSetting(viewModel.internalTime)
+        } label: {
+            Text("Done")
+                .bold()
+                .foregroundColor((colorScheme == .light && viewModel.shouldDisableDone) ? .black : .white)
+                .frame(width: buttonWidth, height: buttonHeight)
+                .background(
+                    RoundedRectangle(cornerRadius: buttonCornerRadius)
+                        .foregroundStyle(Color.accentColor.gradient)
+                    //                    .foregroundColor(.accentColor)
+                        .shadow(color: Color(.black).opacity(shadowOpacity), radius: shadowSize, x: 0, y: shadowSize)
+                )
+        }
+        .buttonStyle(.borderless)
+        .position(x: xPosition, y: yPosition)
+        .disabled(viewModel.shouldDisableDone)
+        .opacity(viewModel.shouldDisableDone ? (colorScheme == .light ? 0.2 : 0.2) : 1)
+    }
 }
