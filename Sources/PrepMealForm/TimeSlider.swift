@@ -232,7 +232,7 @@ struct TimeSlider: View {
     
     func date(for timeslot: Int) -> Date {
         let timeInterval = Double(currentTimeSlot) * 15 * 60
-        return Date().startOfDay.addingTimeInterval(timeInterval)
+        return date.startOfDay.addingTimeInterval(timeInterval)
     }
     func timeString(for timeslot: Int) -> String {
         timeString(for: date(for: timeslot))
