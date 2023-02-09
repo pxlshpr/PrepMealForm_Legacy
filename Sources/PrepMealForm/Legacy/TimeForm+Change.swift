@@ -4,7 +4,7 @@ extension TimeForm {
     
     func attemptToChangeTimeTo(_ time: Date) {
 
-        var newTime = time
+        let newTime = time
 
         //TODO: CoreData
 //        let meals = Store.meals(onDate: currentDate)
