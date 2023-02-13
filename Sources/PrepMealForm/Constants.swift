@@ -9,5 +9,17 @@ struct K {
         static let keyboardDark = "383838"
     }
     
-    static let mealPresets = ["Breakfast", "Lunch", "Dinner", "Pre-workout Meal", "Post-workout Meal", "Intra-workout Snack", "Snack", "Dinner Out", "Supper", "Midnight Snack", "Dessert"]
+    static let mealPresets = [
+        "Breakfast",
+        "Lunch",
+        "Dinner",
+        "Pre-workout Meal",
+        "Intra-workout Snack",
+        "Post-workout Meal",
+        "Snack",
+        "Dinner Out",
+        "Supper",
+        "Midnight Snack",
+        "Dessert"
+    ]
 }

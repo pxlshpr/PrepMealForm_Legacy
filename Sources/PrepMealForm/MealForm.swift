@@ -27,6 +27,9 @@ public struct MealForm: View {
 
     @State var lastTime: Date = Date()
     @State var refreshDatePicker: Bool = false
+    
+    @State var nameIsDirty = false
+    @State var ignoreNextNameChange = false
 
     public init(
         existingMeal: DayMeal? = nil,
@@ -60,6 +63,14 @@ public struct MealForm: View {
             .task { getExistingMealTimes() }
             .sheet(isPresented: $showingTimeForm) { timeForm }
             .onChange(of: time, perform: timeChanged)
+            .onChange(of: name, perform: nameChanged)
+    }
+    
+    func nameChanged(_ newValue: String) {
+        guard !ignoreNextNameChange else {
+            return
+        }
+        nameIsDirty = true
     }
     
     func getExistingMealTimes() {
@@ -70,7 +81,7 @@ public struct MealForm: View {
                 self.existingMealTimes = existingMealTimes
                 if existingMeal == nil {
                     /// We're assuming that the fetch of the existing meals happens quickly enough that
-                    /// `time` hasn't been changed yet—if it ends up taking long enough for the user to make
+                    /// `time` hasn't been changed yet—if it ends up taking long enough for the user to have made
                     /// a change, only do this if the user hasn't changed the value already.
                     self.time = newMealTime(for: date, existingMealTimes: existingMealTimes)
                 }
@@ -329,6 +340,7 @@ public struct MealForm: View {
     }
     
     func timeChanged(_ newTime: Date) {
+        /// Adjust to nearestAvailableTimeslot
         let timeSlot = newTime.timeSlot(within: date)
         if existingTimeSlots.contains(timeSlot) {
             guard let nearestAvailable = nearestAvailableTimeSlot(to: timeSlot) else {
@@ -336,6 +348,12 @@ public struct MealForm: View {
                 return
             }
             self.time = date.timeForTimeSlot(nearestAvailable)
+        }
+        
+        /// If user hasn't changed the name yet, keep adjusting it to the time-based preset
+        if !nameIsDirty {
+            ignoreNextNameChange = true
+            self.name = newMealName(for: newTime)
         }
     }
     
@@ -370,6 +388,7 @@ public struct MealForm: View {
     func tappedSave() {
         /// This is to ensure that the date picker is dismissed if a confirmation button
         /// is tapped while it's presented (otherwise causing the dismissal to fail)
+        refreshDatePicker.toggle()
         Haptics.successFeedback()
         didSaveMeal(name, time, nil)
         dismiss()
@@ -462,9 +481,60 @@ public struct MealForm: View {
 }
 
 public func newMealTime(for date: Date, existingMealTimes: [Date] = []) -> Date {
+    
+    func nextAvailableTimeSlot(to time: Date, within date: Date, existingMealTimes: [Date]) -> Int? {
+        let timeSlot = time.timeSlot(within: date) + 1
+        let existingTimeSlots = existingMealTimes.compactMap {
+            $0.timeSlot(within: date)
+        }
+        return nearestAvailableTimeSlot(to: timeSlot, existingTimeSlots: existingTimeSlots)
+    }
+
+    func nearestAvailableTimeSlot(to timeSlot: Int, existingTimeSlots: [Int], allowSearchingBackwards: Bool = false) -> Int? {
+        
+        /// First search forwards till the end
+        for t in timeSlot..<K.numberOfSlots {
+            if !existingTimeSlots.contains(t) {
+                return t
+            }
+        }
+        
+        guard allowSearchingBackwards else { return nil }
+        
+        /// Search backwards
+        for t in (0..<timeSlot-1).reversed() {
+            if !existingTimeSlots.contains(t) {
+                return t
+            }
+        }
+        
+        return nil
+    }
+    
     if date.isToday {
-        return Date()
+        
+        guard let timeSlot = nextAvailableTimeSlot(
+            to: Date(),
+            within: date,
+            existingMealTimes: existingMealTimes
+        ) else {
+            /// Fallback when all timeSlots are taken
+            return Date()
+        }
+        return date.timeForTimeSlot(timeSlot)
+        
     } else {
-        return date.h(12, m: 0, s: 0)
+        
+        let lastMealTimeOrNoon = existingMealTimes.sorted(by: { $0 < $1 }).last ?? date.h(12, m: 0, s: 0)
+        guard let timeSlot = nextAvailableTimeSlot(
+            to: lastMealTimeOrNoon,
+            within: date,
+            existingMealTimes: existingMealTimes
+        ) else {
+            /// Fallback when all timeSlots are taken
+            return date.h(12, m: 0, s: 0)
+        }
+        return date.timeForTimeSlot(timeSlot)
+
     }
 }
