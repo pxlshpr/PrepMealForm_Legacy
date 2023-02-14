@@ -267,7 +267,7 @@ public struct MealForm: View {
 //                        do {
 //                            try DataManager.shared.deleteMeal(existingMeal)
 //                        } catch {
-//                            print("Couldn't delete meal: \(error)")
+//                            cprint("Couldn't delete meal: \(error)")
 //                        }
 //                    }
 //                )
@@ -376,7 +376,7 @@ public struct MealForm: View {
                         do {
                             try DataManager.shared.deleteMeal(existingMeal)
                         } catch {
-                            print("Couldn't delete meal: \(error)")
+                            cprint("Couldn't delete meal: \(error)")
                         }
                     }
                 )
