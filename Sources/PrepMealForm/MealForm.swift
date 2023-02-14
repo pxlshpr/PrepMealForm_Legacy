@@ -351,7 +351,7 @@ public struct MealForm: View {
         }
         
         /// If user hasn't changed the name yet, keep adjusting it to the time-based preset
-        if !nameIsDirty {
+        if !nameIsDirty && existingMeal == nil {
             ignoreNextNameChange = true
             self.name = newMealName(for: newTime)
         }
