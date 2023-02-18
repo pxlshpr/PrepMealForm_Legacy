@@ -2,8 +2,9 @@ import SwiftUI
 import SwiftHaptics
 import NamePicker
 import SwiftUISugar
-import PrepGoalSetsList
 import PrepViews
+
+//import PrepGoalSetsList
 
 public struct MealForm_Legacy2: View {
 
@@ -636,12 +637,13 @@ public struct MealForm_Legacy2: View {
     }
     
     var goalSetPicker: some View {
-        GoalSetPicker(
-            meal: nil,
-            showCloseButton: false,
-            selectedGoalSet: viewModel.goalSet,
-            didSelectGoalSet: didSelectGoalSet
-        )
+        EmptyView()
+//        GoalSetPicker(
+//            meal: nil,
+//            showCloseButton: false,
+//            selectedGoalSet: viewModel.goalSet,
+//            didSelectGoalSet: didSelectGoalSet
+//        )
     }
     
     func didSelectGoalSet(_ goalSet: GoalSet?, day: Day?) {
