@@ -50,18 +50,19 @@ public struct MealForm: View {
         self.existingMeal = existingMeal
         self.didSaveMeal = didSaveMeal
         
+        self.existingMealTimes = existingMealTimes
+
         if let existingMeal {
             _name = State(initialValue: existingMeal.name)
-//            _time = State(initialValue: Date(timeIntervalSince1970: existingMeal.time))
+            _time = State(initialValue: Date(timeIntervalSince1970: existingMeal.time))
         } else {
-            let time = newMealTime(for: date)
+//            let time = newMealTime(for: date)
+            let time = newMealTime(for: date, existingMealTimes: existingMealTimes)
             _name = State(initialValue: newMealName(for: time))
 //            _time = State(initialValue: time)
+            _time = State(initialValue: time)
         }
         
-        self.existingMealTimes = existingMealTimes
-        let time = newMealTime(for: date, existingMealTimes: existingMealTimes)
-        _time = State(initialValue: time)
     }
 
     public var body: some View {
