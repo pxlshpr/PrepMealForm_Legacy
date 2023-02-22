@@ -2,8 +2,6 @@ import Foundation
 
 struct K {
     
-    static let numberOfSlots = 120
-    
     struct ColorHex {
         static let keyboardLight = "CFD3D9"
         static let keyboardDark = "383838"

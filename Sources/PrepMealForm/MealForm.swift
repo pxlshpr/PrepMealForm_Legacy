@@ -318,26 +318,26 @@ public struct MealForm: View {
         return start...end
     }
     
-    func nearestAvailableTimeSlot(to timeSlot: Int) -> Int? {
-        
-        func timeSlotIsAvailable(_ timeSlot: Int) -> Bool {
-            timeSlot != self.currentTimeSlot && !existingTimeSlots.contains(timeSlot)
-        }
-        
-        /// First search forwards till the end
-        for t in timeSlot..<K.numberOfSlots {
-            if timeSlotIsAvailable(t) {
-                return t
-            }
-        }
-        /// If we still haven't find one, go backwards
-        for t in (0..<timeSlot-1).reversed() {
-            if timeSlotIsAvailable(t) {
-                return t
-            }
-        }
-        return nil
-    }
+//    func nearestAvailableTimeSlot(to timeSlot: Int) -> Int? {
+//
+//        func timeSlotIsAvailable(_ timeSlot: Int) -> Bool {
+//            timeSlot != self.currentTimeSlot && !existingTimeSlots.contains(timeSlot)
+//        }
+//
+//        /// First search forwards till the end
+//        for t in timeSlot..<K.numberOfSlots {
+//            if timeSlotIsAvailable(t) {
+//                return t
+//            }
+//        }
+//        /// If we still haven't find one, go backwards
+//        for t in (0..<timeSlot-1).reversed() {
+//            if timeSlotIsAvailable(t) {
+//                return t
+//            }
+//        }
+//        return nil
+//    }
     
     var currentTimeSlot: Int {
         time.timeSlot(within: date)
@@ -353,7 +353,13 @@ public struct MealForm: View {
         /// Adjust to nearestAvailableTimeslot
         let timeSlot = newTime.timeSlot(within: date)
         if existingTimeSlots.contains(timeSlot) {
-            guard let nearestAvailable = nearestAvailableTimeSlot(to: timeSlot) else {
+            guard let nearestAvailable = nextAvailableTimeSlot(
+                to: timeSlot,
+                existingTimeSlots: existingTimeSlots,
+                ignoring: currentTimeSlot,
+                searchBackwardsIfNotFound: true
+            ) else {
+//            guard let nearestAvailable = nearestAvailableTimeSlot(to: timeSlot) else {
                 self.time = lastTime
                 return
             }
@@ -492,42 +498,44 @@ public struct MealForm: View {
 
 public func newMealTime(for date: Date, existingMealTimes: [Date] = []) -> Date {
     
-    func nextAvailableTimeSlot(to time: Date, within date: Date, existingMealTimes: [Date]) -> Int? {
-        let timeSlot = time.timeSlot(within: date) + 1
-        let existingTimeSlots = existingMealTimes.compactMap {
-            $0.timeSlot(within: date)
-        }
-        return nearestAvailableTimeSlot(to: timeSlot, existingTimeSlots: existingTimeSlots)
-    }
-
-    func nearestAvailableTimeSlot(to timeSlot: Int, existingTimeSlots: [Int], allowSearchingBackwards: Bool = false) -> Int? {
-        
-        /// First search forwards till the end
-        for t in timeSlot..<K.numberOfSlots {
-            if !existingTimeSlots.contains(t) {
-                return t
-            }
-        }
-        
-        guard allowSearchingBackwards else { return nil }
-        
-        /// Search backwards
-        for t in (0..<timeSlot-1).reversed() {
-            if !existingTimeSlots.contains(t) {
-                return t
-            }
-        }
-        
-        return nil
-    }
+//    func nextAvailableTimeSlot(to time: Date, within date: Date, existingMealTimes: [Date]) -> Int? {
+//        let timeSlot = time.timeSlot(within: date) + 1
+//        let existingTimeSlots = existingMealTimes.compactMap {
+//            $0.timeSlot(within: date)
+//        }
+//        return nearestAvailableTimeSlot(to: timeSlot, existingTimeSlots: existingTimeSlots)
+//    }
+//
+//    func nearestAvailableTimeSlot(to timeSlot: Int, existingTimeSlots: [Int], allowSearchingBackwards: Bool = false) -> Int? {
+//
+//        /// First search forwards till the end
+//        for t in timeSlot..<K.numberOfSlots {
+//            if !existingTimeSlots.contains(t) {
+//                return t
+//            }
+//        }
+//
+//        guard allowSearchingBackwards else { return nil }
+//
+//        /// Search backwards
+//        for t in (0..<timeSlot-1).reversed() {
+//            if !existingTimeSlots.contains(t) {
+//                return t
+//            }
+//        }
+//
+//        return nil
+//    }
     
     if date.isToday {
         
         guard let timeSlot = nextAvailableTimeSlot(
             to: Date(),
             within: date,
-            existingMealTimes: existingMealTimes
+            existingMealTimes: existingMealTimes,
+            skippingFirstTimeSlot: true
         ) else {
+//        guard let timeSlot = nextAvailableTimeSlot(to: Date(), within: date, existingMealTimes: existingMealTimes) else {
             /// Fallback when all timeSlots are taken
             return Date()
         }
@@ -539,7 +547,8 @@ public func newMealTime(for date: Date, existingMealTimes: [Date] = []) -> Date 
         guard let timeSlot = nextAvailableTimeSlot(
             to: lastMealTimeOrNoon,
             within: date,
-            existingMealTimes: existingMealTimes
+            existingMealTimes: existingMealTimes,
+            searchBackwardsIfNotFound: true
         ) else {
             /// Fallback when all timeSlots are taken
             return date.h(12, m: 0, s: 0)

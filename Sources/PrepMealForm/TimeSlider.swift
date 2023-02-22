@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftUISugar
 import SwiftHaptics
+import PrepDataTypes
 
 struct TimeSlider: View {
 
@@ -64,7 +65,13 @@ struct TimeSlider: View {
 
     func tappedX(_ x: CGFloat) {
         let tappedTimeSlot = timeSlot(for: x)
-        if let timeSlot = nearestAvailableTimeSlot(to: tappedTimeSlot) {
+//        if let timeSlot = nearestAvailableTimeSlot(to: tappedTimeSlot) {
+        if let timeSlot = nextAvailableTimeSlot(
+            to: tappedTimeSlot,
+            existingTimeSlots: existingTimeSlots,
+            ignoring: currentTimeSlot,
+            searchBackwardsIfNotFound: true
+        ) {
             withAnimation(.interactiveSpring()) {
                 Haptics.feedback(style: .soft)
                 self.currentTimeSlot = timeSlot
@@ -73,26 +80,26 @@ struct TimeSlider: View {
         }
     }
     
-    func nearestAvailableTimeSlot(to timeSlot: Int) -> Int? {
-        
-        func timeSlotIsAvailable(_ timeSlot: Int) -> Bool {
-            timeSlot != self.currentTimeSlot && !existingTimeSlots.contains(timeSlot)
-        }
-        
-        /// First search forwards till the end
-        for t in timeSlot..<K.numberOfSlots {
-            if timeSlotIsAvailable(t) {
-                return t
-            }
-        }
-        /// If we still haven't find one, go backwards
-        for t in (0..<timeSlot-1).reversed() {
-            if timeSlotIsAvailable(t) {
-                return t
-            }
-        }
-        return nil
-    }
+//    func nearestAvailableTimeSlot(to timeSlot: Int) -> Int? {
+//
+//        func timeSlotIsAvailable(_ timeSlot: Int) -> Bool {
+//            timeSlot != self.currentTimeSlot && !existingTimeSlots.contains(timeSlot)
+//        }
+//
+//        /// First search forwards till the end
+//        for t in timeSlot..<K.numberOfSlots {
+//            if timeSlotIsAvailable(t) {
+//                return t
+//            }
+//        }
+//        /// If we still haven't find one, go backwards
+//        for t in (0..<timeSlot-1).reversed() {
+//            if timeSlotIsAvailable(t) {
+//                return t
+//            }
+//        }
+//        return nil
+//    }
 
     var dragGesture: some Gesture {
         func changed(_ value: DragGesture.Value) {
@@ -112,7 +119,7 @@ struct TimeSlider: View {
     }
     
     func width(for width: CGFloat) -> CGFloat {
-        (width - (spacing * (CGFloat(K.numberOfSlots) - 1.0))) / CGFloat(K.numberOfSlots)
+        (width - (spacing * (CGFloat(PrepConstants.numberOfTimeSlotsInADay) - 1.0))) / CGFloat(PrepConstants.numberOfTimeSlotsInADay)
     }
     
     func minX(for timeSlot: Int) -> CGFloat {
@@ -257,7 +264,7 @@ struct TimeSlider: View {
     func timeSlot(for x: CGFloat) -> Int {
         let width = width(for: sliderWidth)
         let timeSlot = Int(x / (width + spacing))
-        return min(max(timeSlot, 0), K.numberOfSlots - 1)
+        return min(max(timeSlot, 0), PrepConstants.numberOfTimeSlotsInADay - 1)
     }
 
     var slider: some View {
@@ -265,7 +272,7 @@ struct TimeSlider: View {
         return GeometryReader { proxy in
             ZStack {
                 HStack(spacing: spacing) {
-                    ForEach(0..<K.numberOfSlots, id: \.self) {
+                    ForEach(0..<PrepConstants.numberOfTimeSlotsInADay, id: \.self) {
                         rectangle(at: $0)
                             .frame(width: width(for: proxy.size.width), height: barHeight)
                     }

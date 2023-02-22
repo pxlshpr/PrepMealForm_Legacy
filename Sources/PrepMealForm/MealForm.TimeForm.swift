@@ -134,26 +134,26 @@ extension MealForm.TimeForm {
         return start...end
     }
     
-    func nearestAvailableTimeSlot(to timeSlot: Int) -> Int? {
-        
-        func timeSlotIsAvailable(_ timeSlot: Int) -> Bool {
-            timeSlot != self.currentTimeSlot && !existingTimeSlots.contains(timeSlot)
-        }
-        
-        /// First search forwards till the end
-        for t in timeSlot..<K.numberOfSlots {
-            if timeSlotIsAvailable(t) {
-                return t
-            }
-        }
-        /// If we still haven't find one, go backwards
-        for t in (0..<timeSlot-1).reversed() {
-            if timeSlotIsAvailable(t) {
-                return t
-            }
-        }
-        return nil
-    }
+//    func nearestAvailableTimeSlot(to timeSlot: Int) -> Int? {
+//
+//        func timeSlotIsAvailable(_ timeSlot: Int) -> Bool {
+//            timeSlot != self.currentTimeSlot && !existingTimeSlots.contains(timeSlot)
+//        }
+//
+//        /// First search forwards till the end
+//        for t in timeSlot..<K.numberOfSlots {
+//            if timeSlotIsAvailable(t) {
+//                return t
+//            }
+//        }
+//        /// If we still haven't find one, go backwards
+//        for t in (0..<timeSlot-1).reversed() {
+//            if timeSlotIsAvailable(t) {
+//                return t
+//            }
+//        }
+//        return nil
+//    }
     
     var currentTimeSlot: Int {
         viewModel.internalTime.timeSlot(within: date)
@@ -168,7 +168,13 @@ extension MealForm.TimeForm {
     func timeChanged(_ newTime: Date) {
         let timeSlot = newTime.timeSlot(within: date)
         if existingTimeSlots.contains(timeSlot) {
-            guard let nearestAvailable = nearestAvailableTimeSlot(to: timeSlot) else {
+            guard let nearestAvailable = nextAvailableTimeSlot(
+                to: timeSlot,
+                existingTimeSlots: existingTimeSlots,
+                ignoring: currentTimeSlot,
+                searchBackwardsIfNotFound: true
+            ) else {
+//            guard let nearestAvailable = nearestAvailableTimeSlot(to: timeSlot) else {
                 viewModel.internalTime = lastTime
                 return
             }
