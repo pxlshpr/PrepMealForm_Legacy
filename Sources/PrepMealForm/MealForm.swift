@@ -14,14 +14,17 @@ public struct MealForm: View {
     let date: Date
     let existingMeal: DayMeal?
     
+//    let existingDayMeals: [DayMeal]
+    
     @State var name: String
-    @State var time: Date = Date()
+    @State var time: Date
     
     @State var showingNameForm = false
     @State var showingTimeForm = false
 
-    let existingMealTimesFunction: ExistingMealTimesFunction?
-    @State var existingMealTimes: [Date] = []
+    //TODO: Remove this!
+//    let existingMealTimesFunction: ExistingMealTimesFunction?
+    let existingMealTimes: [Date]
 
     let didSaveMeal: (String, Date, GoalSet?) -> ()
 
@@ -36,22 +39,29 @@ public struct MealForm: View {
         date: Date,
         recents: [String] = [],
         presets: [String]? = nil,
-        existingMealTimesFunction: ExistingMealTimesFunction? = nil,
+        existingDayMeals: [DayMeal],
+//        existingMealTimesFunction: ExistingMealTimesFunction? = nil,
         didSaveMeal: @escaping (String, Date, GoalSet?) -> ()
     ) {
         self.date = date
-        self.existingMealTimesFunction = existingMealTimesFunction
+//        self.existingMealTimesFunction = existingMealTimesFunction
+//        self.existingDayMeals = existingDayMeals
+        
         self.existingMeal = existingMeal
         self.didSaveMeal = didSaveMeal
         
         if let existingMeal {
             _name = State(initialValue: existingMeal.name)
-            _time = State(initialValue: Date(timeIntervalSince1970: existingMeal.time))
+//            _time = State(initialValue: Date(timeIntervalSince1970: existingMeal.time))
         } else {
             let time = newMealTime(for: date)
             _name = State(initialValue: newMealName(for: time))
-            _time = State(initialValue: time)
+//            _time = State(initialValue: time)
         }
+        
+        self.existingMealTimes = existingDayMeals.map { $0.timeDate }
+        let time = newMealTime(for: date, existingMealTimes: existingMealTimes)
+        _time = State(initialValue: time)
     }
 
     public var body: some View {
@@ -60,7 +70,7 @@ public struct MealForm: View {
             .presentationDetents([.height(400)])
             .presentationDragIndicator(.hidden)
             .sheet(isPresented: $showingNameForm) { nameForm }
-            .task { getExistingMealTimes() }
+//            .task { getExistingMealTimes() }
             .sheet(isPresented: $showingTimeForm) { timeForm }
             .onChange(of: time, perform: timeChanged)
             .onChange(of: name, perform: nameChanged)
@@ -73,21 +83,21 @@ public struct MealForm: View {
         nameIsDirty = true
     }
     
-    func getExistingMealTimes() {
-        guard let existingMealTimesFunction else { return }
-        Task {
-            let existingMealTimes = try await existingMealTimesFunction(date)
-            await MainActor.run {
-                self.existingMealTimes = existingMealTimes
-                if existingMeal == nil {
-                    /// We're assuming that the fetch of the existing meals happens quickly enough that
-                    /// `time` hasn't been changed yet—if it ends up taking long enough for the user to have made
-                    /// a change, only do this if the user hasn't changed the value already.
-                    self.time = newMealTime(for: date, existingMealTimes: existingMealTimes)
-                }
-            }
-        }
-    }
+//    func getExistingMealTimes() {
+//        guard let existingMealTimesFunction else { return }
+//        Task {
+//            let existingMealTimes = try await existingMealTimesFunction(date)
+//            await MainActor.run {
+//                self.existingMealTimes = existingMealTimes
+//                if existingMeal == nil {
+//                    /// We're assuming that the fetch of the existing meals happens quickly enough that
+//                    /// `time` hasn't been changed yet—if it ends up taking long enough for the user to have made
+//                    /// a change, only do this if the user hasn't changed the value already.
+//                    self.time = newMealTime(for: date, existingMealTimes: existingMealTimes)
+//                }
+//            }
+//        }
+//    }
 
     
     var nameForm: some View {
@@ -98,7 +108,7 @@ public struct MealForm: View {
         TimeForm(
             date: date,
             time: $time,
-            existingMealTimes: $existingMealTimes
+            existingMealTimes: .constant(existingMealTimes)
         )
     }
 
