@@ -39,7 +39,7 @@ public struct MealForm: View {
         date: Date,
         recents: [String] = [],
         presets: [String]? = nil,
-        existingDayMeals: [DayMeal],
+        existingMealTimes: [Date],
 //        existingMealTimesFunction: ExistingMealTimesFunction? = nil,
         didSaveMeal: @escaping (String, Date, GoalSet?) -> ()
     ) {
@@ -59,7 +59,7 @@ public struct MealForm: View {
 //            _time = State(initialValue: time)
         }
         
-        self.existingMealTimes = existingDayMeals.map { $0.timeDate }
+        self.existingMealTimes = existingMealTimes
         let time = newMealTime(for: date, existingMealTimes: existingMealTimes)
         _time = State(initialValue: time)
     }
