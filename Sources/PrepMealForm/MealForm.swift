@@ -354,11 +354,11 @@ public struct MealForm: View {
         /// Adjust to nearestAvailableTimeslot
         let timeSlot = newTime.timeSlot(within: date)
         if existingTimeSlots.contains(timeSlot) {
-            guard let nearestAvailable = nextAvailableTimeSlot(
+            guard let nearestAvailable = nearestAvailableTimeSlot(
                 to: timeSlot,
                 existingTimeSlots: existingTimeSlots,
                 ignoring: currentTimeSlot,
-                searchBackwardsIfNotFound: true
+                searchingBothDirections: true
             ) else {
 //            guard let nearestAvailable = nearestAvailableTimeSlot(to: timeSlot) else {
                 self.time = lastTime
@@ -530,7 +530,7 @@ public func newMealTime(for date: Date, existingMealTimes: [Date] = []) -> Date 
     
     if date.isToday {
         
-        guard let timeSlot = nextAvailableTimeSlot(
+        guard let timeSlot = nearestAvailableTimeSlot(
             to: Date(),
             within: date,
             existingMealTimes: existingMealTimes,
@@ -545,11 +545,11 @@ public func newMealTime(for date: Date, existingMealTimes: [Date] = []) -> Date 
     } else {
         
         let lastMealTimeOrNoon = existingMealTimes.sorted(by: { $0 < $1 }).last ?? date.h(12, m: 0, s: 0)
-        guard let timeSlot = nextAvailableTimeSlot(
+        guard let timeSlot = nearestAvailableTimeSlot(
             to: lastMealTimeOrNoon,
             within: date,
             existingMealTimes: existingMealTimes,
-            searchBackwardsIfNotFound: true
+            searchingBothDirections: true
         ) else {
             /// Fallback when all timeSlots are taken
             return date.h(12, m: 0, s: 0)

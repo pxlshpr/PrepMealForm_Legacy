@@ -168,11 +168,11 @@ extension MealForm.TimeForm {
     func timeChanged(_ newTime: Date) {
         let timeSlot = newTime.timeSlot(within: date)
         if existingTimeSlots.contains(timeSlot) {
-            guard let nearestAvailable = nextAvailableTimeSlot(
+            guard let nearestAvailable = nearestAvailableTimeSlot(
                 to: timeSlot,
                 existingTimeSlots: existingTimeSlots,
                 ignoring: currentTimeSlot,
-                searchBackwardsIfNotFound: true
+                searchingBothDirections: true
             ) else {
 //            guard let nearestAvailable = nearestAvailableTimeSlot(to: timeSlot) else {
                 viewModel.internalTime = lastTime

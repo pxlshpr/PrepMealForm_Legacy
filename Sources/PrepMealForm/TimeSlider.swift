@@ -66,11 +66,11 @@ struct TimeSlider: View {
     func tappedX(_ x: CGFloat) {
         let tappedTimeSlot = timeSlot(for: x)
 //        if let timeSlot = nearestAvailableTimeSlot(to: tappedTimeSlot) {
-        if let timeSlot = nextAvailableTimeSlot(
+        if let timeSlot = nearestAvailableTimeSlot(
             to: tappedTimeSlot,
             existingTimeSlots: existingTimeSlots,
             ignoring: currentTimeSlot,
-            searchBackwardsIfNotFound: true
+            searchingBothDirections: true
         ) {
             withAnimation(.interactiveSpring()) {
                 Haptics.feedback(style: .soft)
